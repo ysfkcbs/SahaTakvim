@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Kullanıcı Yönetimi</h3>
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card"><div class="card-body">
+      <form method="post">{{ form.hidden_tag() }}
+        <div class="mb-2">{{ form.username.label }}{{ form.username(class='form-control') }}</div>
+        <div class="mb-2">{{ form.password.label }}{{ form.password(class='form-control') }}</div>
+        <div class="mb-2">{{ form.role.label }}{{ form.role(class='form-select') }}</div>
+        {{ form.submit(class='btn btn-success') }}
+      </form>
+    </div></div>
+  </div>
+  <div class="col-md-8">
+    <table class="table table-striped"><tr><th>Kullanıcı</th><th>Rol</th><th>Durum</th></tr>
+      {% for u in users %}<tr><td>{{u.username}}</td><td>{{u.role}}</td><td>{{'Aktif' if u.is_active_user else 'Pasif'}}</td></tr>{% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}
