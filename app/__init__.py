@@ -10,6 +10,8 @@ def create_app(config_name=None):
     load_dotenv()
     app = Flask(__name__, instance_relative_config=True)
 
+    os.makedirs(app.instance_path, exist_ok=True)
+
     env = config_name or os.getenv("FLASK_ENV", "development")
     from .config import config_map
 
