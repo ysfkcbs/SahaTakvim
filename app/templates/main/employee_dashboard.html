@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Çalışan Paneli</h2>
+<div class="d-flex gap-2 mb-3">
+  <a class="btn btn-primary" href="{{ url_for('calendar.weekly') }}">Haftalık Takvim</a>
+  <a class="btn btn-outline-primary" href="{{ url_for('finance.daily_closing') }}">Gün Sonu Kapanışı</a>
+</div>
+<div class="card"><div class="card-header">Bugünkü Rezervasyonlar ({{ today }})</div><div class="card-body">
+<table class="table"><tr><th>Saat</th><th>Kişi</th><th>Tür</th><th>Kapora</th></tr>
+{% for r in todays %}<tr><td>{{'%02d:00'|format(r.reservation_hour)}}</td><td>{{r.customer_name}}</td><td>{{r.reservation_type}}</td><td>{{'Alındı' if r.deposit_paid else 'Bekliyor'}}</td></tr>{% else %}<tr><td colspan="4">Rezervasyon bulunamadı.</td></tr>{% endfor %}
+</table></div></div>
+{% endblock %}
