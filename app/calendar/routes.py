@@ -11,6 +11,7 @@ from app.models import Field, Reservation
 
 calendar_bp = Blueprint("calendar", __name__)
 
+WEEKDAY_NAMES_TR = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
 @calendar_bp.route("/weekly")
 @login_required
@@ -46,6 +47,7 @@ def weekly():
         week_start=start,
         week_end=end,
         days=days,
+        weekday_names_tr=WEEKDAY_NAMES_TR,
         hours=hours,
         hour_label=hour_label,
         slot_map=slot_map,

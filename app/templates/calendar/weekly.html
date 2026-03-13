@@ -16,7 +16,7 @@
 </form>
 <div class="table-responsive calendar-wrap">
 <table class="table table-bordered align-middle calendar-table">
-  <thead><tr><th>Saat</th>{% for d in days %}<th>{{ d.strftime('%a %d.%m') }}</th>{% endfor %}</tr></thead>
+  <thead><tr><th>Saat</th>{% for d in days %}<th>{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }}</th>{% endfor %}</tr></thead>
   <tbody>
   {% for h in hours %}
     <tr>
