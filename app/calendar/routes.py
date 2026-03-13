@@ -132,3 +132,8 @@ def delete_reservation(reservation_id):
     db.session.commit()
     flash("Rezervasyon iptal edildi.", "warning")
     return redirect(url_for("calendar.weekly", start=reservation.reservation_date.isoformat(), field=reservation.field_id))
+
+
+# Backward-compatible alias for environments importing `bp` from this module.
+bp = calendar_bp
+__all__ = ["calendar_bp", "bp"]

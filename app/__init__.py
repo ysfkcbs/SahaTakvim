@@ -35,11 +35,17 @@ def create_app(config_name=None):
 
 def register_blueprints(app):
     from .auth.routes import auth_bp
-    from .calendar.routes import calendar_bp
     from .fields.routes import fields_bp
     from .finance.routes import finance_bp
     from .main.routes import main_bp
     from .reports.routes import reports_bp
+
+    # Import calendar module defensively to avoid environment-specific symbol import issues.
+    from .calendar import routes as calendar_routes
+
+    calendar_bp = getattr(calendar_routes, "calendar_bp", None) or getattr(calendar_routes, "bp", None)
+    if calendar_bp is None:
+        raise RuntimeError("Calendar blueprint could not be loaded from app.calendar.routes")
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix="/auth")

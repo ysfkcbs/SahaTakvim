@@ -134,5 +134,6 @@ After each major step commit:
 4. Docs + deploy files
 
 ## Troubleshooting
+- If you see `ImportError: cannot import name 'calendar_bp' from app.calendar.routes`, pull the latest code. The app now loads the calendar blueprint defensively and also exposes a fallback alias (`bp`) in `app/calendar/routes.py`.
 - If you see `ModuleNotFoundError: No module named 'app.models'`, verify that your project root contains `app/models.py` and that you are running commands from the repository root (same folder as `run.py`).
 - Also ensure installation is complete with `pip install -r requirements.txt` in the active virtual environment.
