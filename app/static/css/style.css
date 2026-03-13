@@ -1,0 +1,8 @@
+body { background: linear-gradient(180deg, #f6f8fb 0%, #eef3ff 100%); min-height: 100vh; }
+.card { border: none; border-radius: 1rem; box-shadow: 0 10px 24px rgba(31,55,94,.08); }
+.glass-card { backdrop-filter: blur(6px); }
+.stat-card h4 { margin: 0; font-weight: 700; }
+.calendar-table th, .calendar-table td { min-width: 130px; }
+.slot-cell { cursor: pointer; background: #fff; }
+.slot-cell:hover { background: #f0f7ff; }
+.slot-booked { padding: .35rem; border-left: 4px solid #0d6efd; background: #f8fbff; border-radius: .5rem; }
