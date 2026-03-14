@@ -10,6 +10,11 @@ from app.models import DailyClosing, Expense, ExpenseCategory, Income, IncomeCat
 
 finance_bp = Blueprint("finance", __name__)
 
+def _flash_form_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(f"{getattr(form, field).label.text}: {error}", "danger")
+
 
 @finance_bp.route("/daily-closing", methods=["GET", "POST"])
 @login_required
@@ -28,6 +33,8 @@ def daily_closing():
         db.session.commit()
         flash("Gün sonu kapanışı kaydedildi.", "success")
         return redirect(url_for("finance.daily_closing"))
+    elif form.is_submitted():
+        _flash_form_errors(form)
 
     closings = DailyClosing.query.order_by(DailyClosing.closing_date.desc()).all()
     return render_template("finance/daily_closing.html", form=form, closings=closings)
@@ -60,6 +67,8 @@ def incomes():
         db.session.commit()
         flash("Gelir kaydı eklendi.", "success")
         return redirect(url_for("finance.incomes"))
+    elif form.is_submitted():
+        _flash_form_errors(form)
 
     records = Income.query.order_by(Income.date.desc()).all()
     return render_template("finance/incomes.html", form=form, records=records)
@@ -92,6 +101,8 @@ def expenses():
         db.session.commit()
         flash("Gider kaydı eklendi.", "success")
         return redirect(url_for("finance.expenses"))
+    elif form.is_submitted():
+        _flash_form_errors(form)
 
     records = Expense.query.order_by(Expense.date.desc()).all()
     return render_template("finance/expenses.html", form=form, records=records)

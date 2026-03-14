@@ -136,6 +136,7 @@ After each major step commit:
 4. Docs + deploy files
 
 ## Troubleshooting
+- If day-end closing does not save, check amount format. The app now accepts both `1.250,50` and `1250.50`; validation errors are shown as flash messages on submit.
 - User edit now supports legacy links too (`/auth/users/<id>/edit`, `/auth/user/<id>/edit`, `/auth/users/edit/<id>`) to prevent 404 issues from older bookmarks or links.
 - If `from flask ...` or `from flask_login ...` lines are yellow in your editor (Pylance/IDE), it usually means the selected Python interpreter is not the project virtualenv. Activate `.venv`, run `pip install -r requirements.txt`, and select that interpreter in VS Code/PyCharm.
 - If you get `sqlite3.OperationalError: unable to open database file`, ensure the app has write permission to the project folder and use an absolute SQLite path or keep `DATABASE_URL` empty so default `instance/app.db` is created automatically.
