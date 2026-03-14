@@ -94,6 +94,7 @@ Admin can:
 - Forecast includes recurring entries + reservation-based expected income
 
 ## Dashboards & Reports (Step 10)
+- Admin dashboard with user management (create, edit, activate/deactivate employee/admin accounts)
 - **Admin dashboard** with KPI cards and upcoming reservations
 - **Employee dashboard** with today list + shortcuts
 - Reservation report list for filtering-ready management
@@ -134,6 +135,7 @@ After each major step commit:
 4. Docs + deploy files
 
 ## Troubleshooting
+- If `from flask ...` or `from flask_login ...` lines are yellow in your editor (Pylance/IDE), it usually means the selected Python interpreter is not the project virtualenv. Activate `.venv`, run `pip install -r requirements.txt`, and select that interpreter in VS Code/PyCharm.
 - If you get `sqlite3.OperationalError: unable to open database file`, ensure the app has write permission to the project folder and use an absolute SQLite path or keep `DATABASE_URL` empty so default `instance/app.db` is created automatically.
 - If you see `ImportError: cannot import name 'calendar_bp' from app.calendar.routes`, pull the latest code. The app now loads the calendar blueprint defensively and also exposes a fallback alias (`bp`) in `app/calendar/routes.py`.
 - If you see `ModuleNotFoundError: No module named 'app.models'`, verify that your project root contains `app/models.py` and that you are running commands from the repository root (same folder as `run.py`).
