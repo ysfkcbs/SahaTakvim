@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Rezervasyon Raporu</h3>
+<table class="table table-striped"><tr><th>Tarih</th><th>Saat</th><th>Saha</th><th>Kişi</th><th>Tür</th><th>Kapora</th><th>Durum</th></tr>
+{% for r in records %}<tr><td>{{r.reservation_date}}</td><td>{{'%02d:00'|format(r.reservation_hour)}}</td><td>{{r.field.name}}</td><td>{{r.customer_name}}</td><td>{{r.reservation_type}}</td><td>{{'Paid' if r.deposit_paid else 'Unpaid'}}</td><td>{{r.status}}</td></tr>{% endfor %}
+</table>
+{% endblock %}

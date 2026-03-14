@@ -1,0 +1,11 @@
+<div class="card card-body"><form method="post">{{ form.hidden_tag() }}
+<div class="row g-2">
+<div class="col-md-3">{{ form.title.label }}{{ form.title(class='form-control') }}</div>
+<div class="col-md-2">{{ form.category.label }}{{ form.category(class='form-control') }}</div>
+<div class="col-md-2">{{ form.amount.label }}{{ form.amount(class='form-control') }}</div>
+<div class="col-md-2">{{ form.date.label }}{{ form.date(class='form-control') }}</div>
+<div class="col-md-3">{{ form.recurrence.label }}{{ form.recurrence(class='form-select') }}</div>
+<div class="col-12">{{ form.description.label }}{{ form.description(class='form-control') }}</div>
+<div class="col-12 form-check">{{ form.is_recurring(class='form-check-input') }} {{ form.is_recurring.label(class='form-check-label') }}</div>
+</div>
+{{ form.submit(class='btn btn-primary mt-3') }}</form></div>
