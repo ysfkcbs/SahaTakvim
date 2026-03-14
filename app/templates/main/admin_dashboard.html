@@ -4,9 +4,9 @@
 <div class="row g-3 mb-4">
   <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Bu Hafta Rez.</small><h4>{{ reservations_week }}</h4></div></div></div>
   <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Bu Ay Rez.</small><h4>{{ reservations_month }}</h4></div></div></div>
-  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Gelir</small><h4>₺{{ '%.0f'|format(month_income) }}</h4></div></div></div>
-  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Gider</small><h4>₺{{ '%.0f'|format(month_expenses) }}</h4></div></div></div>
-  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Net</small><h4>₺{{ '%.0f'|format(net_result) }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Gelir</small><h4>₺{{ '%.0f'|format(month_income|float) }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Gider</small><h4>₺{{ '%.0f'|format(month_expenses|float) }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Net</small><h4>₺{{ '%.0f'|format(net_result|float) }}</h4></div></div></div>
   <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Aktif Saha</small><h4>{{ active_fields }}</h4></div></div></div>
 </div>
 <div class="row g-4">
@@ -19,7 +19,7 @@
   </div>
   <div class="col-lg-5">
     <div class="card"><div class="card-header">Son Gün Sonu Kayıtları</div><div class="card-body">
-      <ul class="list-group list-group-flush">{% for c in daily_closings %}<li class="list-group-item d-flex justify-content-between"><span>{{c.closing_date}}</span><strong>₺{{ '%.0f'|format(c.card_total + c.cash_total + c.iban_total) }}</strong></li>{% else %}<li class="list-group-item">Kayıt yok.</li>{% endfor %}</ul>
+      <ul class="list-group list-group-flush">{% for c in daily_closings %}<li class="list-group-item d-flex justify-content-between"><span>{{c.closing_date}}</span><strong>₺{{ '%.0f'|format((c.card_total|float) + (c.cash_total|float) + (c.iban_total|float)) }}</strong></li>{% else %}<li class="list-group-item">Kayıt yok.</li>{% endfor %}</ul>
     </div></div>
   </div>
 </div>
