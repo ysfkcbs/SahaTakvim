@@ -94,7 +94,6 @@ Admin can:
 - Forecast includes recurring entries + reservation-based expected income
 
 ## Dashboards & Reports (Step 10)
-- Admin dashboard with user management (create, edit, activate/deactivate employee/admin accounts)
 - User management includes safeguards so the last active admin cannot be deactivated or demoted accidentally.
 - Admin dashboard with user management (create, edit, activate/deactivate employee/admin accounts)
 - **Admin dashboard** with KPI cards and upcoming reservations

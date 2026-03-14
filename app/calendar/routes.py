@@ -13,6 +13,7 @@ calendar_bp = Blueprint("calendar", __name__)
 
 WEEKDAY_NAMES_TR = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 
+
 @calendar_bp.route("/weekly")
 @login_required
 def weekly():
