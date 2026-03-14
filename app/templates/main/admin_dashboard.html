@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">Admin Dashboard</h2>
+<div class="row g-3 mb-4">
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Bu Hafta Rez.</small><h4>{{ reservations_week }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Bu Ay Rez.</small><h4>{{ reservations_month }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Gelir</small><h4>₺{{ '%.0f'|format(month_income|float) }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Gider</small><h4>₺{{ '%.0f'|format(month_expenses|float) }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Net</small><h4>₺{{ '%.0f'|format(net_result|float) }}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat-card"><div class="card-body"><small>Aktif Saha</small><h4>{{ active_fields }}</h4></div></div></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card"><div class="card-header">Yaklaşan Rezervasyonlar</div><div class="card-body">
+      <table class="table table-hover"><tr><th>Tarih</th><th>Saat</th><th>Ad</th><th>Tür</th><th>Kapora</th></tr>
+      {% for r in upcoming %}<tr><td>{{r.reservation_date}}</td><td>{{'%02d:00'|format(r.reservation_hour)}}</td><td>{{r.customer_name}}</td><td><span class="badge bg-{{'primary' if r.reservation_type=='abone' else 'secondary'}}">{{r.reservation_type}}</span></td><td>{{'✅' if r.deposit_paid else '⏳'}}</td></tr>{% else %}<tr><td colspan="5">Kayıt yok.</td></tr>{% endfor %}
+      </table>
+    </div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card"><div class="card-header">Son Gün Sonu Kayıtları</div><div class="card-body">
+      <ul class="list-group list-group-flush">{% for c in daily_closings %}<li class="list-group-item d-flex justify-content-between"><span>{{c.closing_date}}</span><strong>₺{{ '%.0f'|format((c.card_total|float) + (c.cash_total|float) + (c.iban_total|float)) }}</strong></li>{% else %}<li class="list-group-item">Kayıt yok.</li>{% endfor %}</ul>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

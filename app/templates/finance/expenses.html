@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Gider Yönetimi</h3>
+{% include 'finance/_record_form.html' %}
+<table class="table table-striped mt-3"><tr><th>Tarih</th><th>Başlık</th><th>Kategori</th><th>Tutar</th><th>Tip</th></tr>{% for i in records %}<tr><td>{{i.date}}</td><td>{{i.title}}</td><td>{{i.category.name if i.category else '-'}}</td><td>₺{{i.amount}}</td><td>{{'Sabit' if i.is_recurring else 'Geçici'}}</td></tr>{% endfor %}</table>
+{% endblock %}

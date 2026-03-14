@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Finansal Öngörü</h3>
+<div class="row g-3 mb-3"><div class="col-md-4"><div class="card stat-card"><div class="card-body"><small>Bu Ay Gelir</small><h4>₺{{ '%.0f'|format(month_income|float) }}</h4></div></div></div>
+<div class="col-md-4"><div class="card stat-card"><div class="card-body"><small>Bu Ay Gider</small><h4>₺{{ '%.0f'|format(month_expense|float) }}</h4></div></div></div></div>
+<table class="table"><tr><th>Ay</th><th>Tahmini Gelir</th><th>Tahmini Gider</th><th>Net</th></tr>
+{% for p in projection %}<tr><td>{{p.month}}</td><td>₺{{'%.0f'|format(p.income|float)}}</td><td>₺{{'%.0f'|format(p.expense|float)}}</td><td>₺{{'%.0f'|format(p.net|float)}}</td></tr>{% endfor %}
+</table>
+{% endblock %}
