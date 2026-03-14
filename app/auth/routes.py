@@ -63,6 +63,8 @@ def users():
 
 
 @auth_bp.route("/users/<int:user_id>/edit", methods=["GET", "POST"])
+@auth_bp.route("/user/<int:user_id>/edit", methods=["GET", "POST"])
+@auth_bp.route("/users/edit/<int:user_id>", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
 def edit_user(user_id):
