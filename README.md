@@ -95,6 +95,8 @@ Admin can:
 
 ## Dashboards & Reports (Step 10)
 - Admin dashboard with user management (create, edit, activate/deactivate employee/admin accounts)
+- User management includes safeguards so the last active admin cannot be deactivated or demoted accidentally.
+- Admin dashboard with user management (create, edit, activate/deactivate employee/admin accounts)
 - **Admin dashboard** with KPI cards and upcoming reservations
 - **Employee dashboard** with today list + shortcuts
 - Reservation report list for filtering-ready management

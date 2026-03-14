@@ -11,6 +11,12 @@ from .forms import LoginForm, UserCreateForm, UserUpdateForm
 auth_bp = Blueprint("auth", __name__)
 
 
+def _is_last_active_admin(user: User) -> bool:
+    if user.role != "admin" or not user.is_active_user:
+        return False
+    return User.query.filter_by(role="admin", is_active_user=True).count() <= 1
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -70,9 +76,16 @@ def edit_user(user_id):
             flash("Bu kullanıcı adı başka bir kullanıcıya ait.", "danger")
             return render_template("auth/user_edit.html", form=form, user=user)
 
+        new_role = form.role.data
+        new_active = form.is_active_user.data
+
+        if _is_last_active_admin(user) and (new_role != "admin" or not new_active):
+            flash("Sistemde en az bir aktif admin kalmalıdır.", "danger")
+            return render_template("auth/user_edit.html", form=form, user=user)
+
         user.username = username
-        user.role = form.role.data
-        user.is_active_user = form.is_active_user.data
+        user.role = new_role
+        user.is_active_user = new_active
 
         if form.password.data:
             user.set_password(form.password.data)
@@ -95,6 +108,10 @@ def toggle_user_status(user_id):
     user = User.query.get_or_404(user_id)
     if user.id == current_user.id and user.is_active_user:
         flash("Kendi hesabınızı pasife alamazsınız.", "danger")
+        return redirect(url_for("auth.users"))
+
+    if _is_last_active_admin(user):
+        flash("Sistemde en az bir aktif admin kalmalıdır.", "danger")
         return redirect(url_for("auth.users"))
 
     user.is_active_user = not user.is_active_user
