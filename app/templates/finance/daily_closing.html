@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Gün Sonu Kapanışı</h3>
+<div class="row g-4">
+<div class="col-md-4"><div class="card"><div class="card-body"><form method="post">{{ form.hidden_tag() }}
+<div class="mb-2">{{ form.closing_date.label }}{{ form.closing_date(class='form-control') }}</div>
+<div class="mb-2">{{ form.card_total.label }}{{ form.card_total(class='form-control') }}</div>
+<div class="mb-2">{{ form.cash_total.label }}{{ form.cash_total(class='form-control') }}</div>
+<div class="mb-2">{{ form.iban_total.label }}{{ form.iban_total(class='form-control') }}</div>
+<div class="mb-2">{{ form.notes.label }}{{ form.notes(class='form-control') }}</div>
+{{ form.submit(class='btn btn-success') }}</form></div></div></div>
+<div class="col-md-8"><table class="table table-sm"><tr><th>Tarih</th><th>Kart</th><th>Nakit</th><th>IBAN</th><th>Giren</th></tr>
+{% for c in closings %}<tr><td>{{c.closing_date}}</td><td>{{c.card_total}}</td><td>{{c.cash_total}}</td><td>{{c.iban_total}}</td><td>{{c.entered_by.username}}</td></tr>{% else %}<tr><td colspan="5">Kayıt yok.</td></tr>{% endfor %}
+</table></div></div>
+{% endblock %}
