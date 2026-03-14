@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>{{ title }}</h3>
+<form method="post" class="card card-body">{{ form.hidden_tag() }}
+<div class="row g-3">
+<div class="col-md-6">{{ form.name.label }}{{ form.name(class='form-control') }}</div>
+<div class="col-md-3">{{ form.rental_price.label }}{{ form.rental_price(class='form-control') }}</div>
+<div class="col-md-3">{{ form.subscription_price.label }}{{ form.subscription_price(class='form-control') }}</div>
+<div class="col-md-3">{{ form.open_hour.label }}{{ form.open_hour(class='form-control') }}</div>
+<div class="col-md-3">{{ form.close_hour.label }}{{ form.close_hour(class='form-control') }}</div>
+<div class="col-md-3 form-check mt-4">{{ form.is_active(class='form-check-input') }} {{ form.is_active.label(class='form-check-label') }}</div>
+</div>
+<div class="mt-3">{{ form.submit(class='btn btn-primary') }}</div>
+</form>
+{% endblock %}

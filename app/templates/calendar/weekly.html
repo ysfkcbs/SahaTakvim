@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Haftalık Takvim</h2>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('calendar.weekly', start=prev_week.isoformat(), field=selected_field) }}">← Önceki</a>
+    <a class="btn btn-outline-secondary" href="{{ url_for('calendar.weekly', start=next_week.isoformat(), field=selected_field) }}">Sonraki →</a>
+  </div>
+</div>
+<p class="text-muted">00:00–02:00 saatleri, seçili günün akşam seansının devamı olarak gösterilir.</p>
+<form method="get" class="mb-3 d-flex gap-2">
+  <input type="hidden" name="start" value="{{ week_start.isoformat() }}">
+  <select class="form-select w-auto" name="field" onchange="this.form.submit()">
+    {% for f in fields %}<option value="{{f.id}}" {% if selected_field==f.id %}selected{% endif %}>{{f.name}}</option>{% endfor %}
+  </select>
+</form>
+<div class="table-responsive calendar-wrap">
+<table class="table table-bordered align-middle calendar-table">
+  <thead><tr><th>Saat</th>{% for d in days %}<th>{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }}</th>{% endfor %}</tr></thead>
+  <tbody>
+  {% for h in hours %}
+    <tr>
+      <th>{{ hour_label(h) }}</th>
+      {% for d in days %}
+        {% set r = slot_map.get((d, h)) %}
+        <td class="slot-cell" data-bs-toggle="modal" data-bs-target="#reservationModal" data-date="{{ d }}" data-hour="{{ h }}">
+          {% if r %}
+          <div class="slot-booked">
+            <div class="fw-semibold">{{ r.customer_name }}</div>
+            <span class="badge bg-{{ 'primary' if r.reservation_type=='abone' else 'secondary' }}">{{ r.reservation_type }}</span>
+            <span class="badge bg-{{ 'success' if r.deposit_paid else 'warning text-dark' }}">{{ 'Kapora ✓' if r.deposit_paid else 'Kapora ✗' }}</span>
+            <div class="mt-2">
+              <a href="{{ url_for('calendar.edit_reservation', reservation_id=r.id) }}" class="btn btn-sm btn-light">Düzenle</a>
+            </div>
+          </div>
+          {% else %}
+            <span class="text-muted small">Boş slot</span>
+          {% endif %}
+        </td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<div class="modal fade" id="reservationModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title">Rezervasyon Ekle</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+  <form method="post" action="{{ url_for('calendar.create_reservation') }}">
+    <div class="modal-body">
+      {{ form.hidden_tag() }}
+      <div class="row g-2">
+        <div class="col-md-6">{{ form.reservation_date.label }}{{ form.reservation_date(class='form-control', id='reservation_date_input') }}</div>
+        <div class="col-md-6">{{ form.reservation_hour.label }}{{ form.reservation_hour(class='form-select', id='reservation_hour_input') }}</div>
+      </div>
+      <div class="mt-2">{{ form.field_id.label }}{{ form.field_id(class='form-select') }}</div>
+      <div class="mt-2">{{ form.reservation_type.label }}{{ form.reservation_type(class='form-select') }}</div>
+      <div class="mt-2">{{ form.customer_name.label }}{{ form.customer_name(class='form-control') }}</div>
+      <div class="mt-2">{{ form.phone.label }}{{ form.phone(class='form-control') }}</div>
+      <div class="form-check mt-2">{{ form.deposit_paid(class='form-check-input') }} {{ form.deposit_paid.label(class='form-check-label') }}</div>
+      <div class="mt-2">{{ form.notes.label }}{{ form.notes(class='form-control') }}</div>
+    </div>
+    <div class="modal-footer">{{ form.submit(class='btn btn-primary') }}</div>
+  </form>
+</div></div></div>
+{% endblock %}
