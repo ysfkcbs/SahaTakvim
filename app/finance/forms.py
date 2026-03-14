@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal, InvalidOperation
 
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateField, DecimalField, SelectField, StringField, SubmitField, TextAreaField
@@ -6,9 +7,10 @@ from wtforms.validators import DataRequired, NumberRange, Optional
 
 
 def normalize_decimal_input(value):
-    """Accept both Turkish and international decimal formats.
+    """Accept Turkish/international number formats and return Decimal.
 
-    Examples accepted:
+    Supported examples:
+    - 4430
     - 1250.50
     - 1250,50
     - 1.250,50
@@ -17,8 +19,14 @@ def normalize_decimal_input(value):
     if value is None:
         return value
 
+    if isinstance(value, Decimal):
+        return value
+
     if isinstance(value, (int, float)):
-        return str(value)
+        try:
+            return Decimal(str(value))
+        except InvalidOperation:
+            return value
 
     text = str(value).strip().replace(" ", "")
     if not text:
@@ -28,15 +36,18 @@ def normalize_decimal_input(value):
     has_comma = "," in text
 
     if has_dot and has_comma:
-        # whichever appears last is likely decimal separator
+        # whichever appears last is treated as decimal separator
         if text.rfind(",") > text.rfind("."):
             text = text.replace(".", "").replace(",", ".")
         else:
             text = text.replace(",", "")
     elif has_comma and not has_dot:
-        text = text.replace(".", "").replace(",", ".")
+        text = text.replace(",", ".")
 
-    return text
+    try:
+        return Decimal(text)
+    except InvalidOperation:
+        return value
 
 
 class DailyClosingForm(FlaskForm):
