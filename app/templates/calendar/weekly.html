@@ -19,90 +19,66 @@
   </select>
 </form>
 
-<div class="d-lg-none mobile-calendar-shell">
-  <div class="mobile-day-tabs" role="tablist" aria-label="Gün seçimi">
-    {% for d in days %}
-    <button
-      type="button"
-      class="mobile-day-tab {% if loop.first %}is-active{% endif %}"
-      data-day-tab="{{ loop.index0 }}"
-      aria-selected="{{ 'true' if loop.first else 'false' }}">
-      <span class="mobile-day-tab-name">{{ weekday_names_tr[d.weekday()] }}</span>
-      <span class="mobile-day-tab-date">{{ d.strftime('%d.%m') }}</span>
-    </button>
-    {% endfor %}
-  </div>
-
+<div class="d-lg-none mobile-weekly-shell">
   <div class="mobile-status-legend">
     <span class="mobile-legend-item is-empty">Boş</span>
     <span class="mobile-legend-item is-booked">Tek Saatlik</span>
     <span class="mobile-legend-item is-subscriber">Abone</span>
+    <span class="mobile-legend-item is-paid">Kapora Alındı</span>
   </div>
+  <p class="mobile-weekly-help">Boş hücreye dokunarak rezervasyon ekleyin, dolu hücreye dokunarak detay ve düzenleme ekranına gidin.</p>
 
-  {% for d in days %}
-  <section class="card mobile-day-panel {% if loop.first %}is-active{% endif %}" data-day-panel="{{ loop.index0 }}">
-    <div class="card-body">
-      <div class="mobile-day-head">
-        <div>
-          <h3 class="h6 mb-1">{{ weekday_names_tr[d.weekday()] }}</h3>
-          <p class="text-muted mb-0">{{ d.strftime('%d.%m.%Y') }}</p>
-        </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reservationModal" data-date="{{ d }}" data-hour="{{ hours[0] }}">Yeni Rezervasyon</button>
-      </div>
-      <div class="mobile-slot-list">
-        {% for h in hours %}
-        {% set r = slot_map.get((d, h)) %}
-        {% if r %}
-        <div class="mobile-slot-item is-booked {% if r.reservation_type == 'abone' %}is-subscriber{% else %}is-match{% endif %}">
-          <span class="mobile-slot-time">{{ hour_label(h) }}</span>
-          <span class="mobile-slot-main">
-            <strong>{{ r.customer_name }}</strong>
-            <span class="slot-visuals mobile-slot-meta">
-              <span class="slot-icon-badge {% if r.reservation_type == 'abone' %}is-subscriber{% else %}is-match{% endif %}" title="{{ 'Abone' if r.reservation_type == 'abone' else 'Tek Saatlik Maç' }}" aria-label="{{ 'Abone' if r.reservation_type == 'abone' else 'Tek Saatlik Maç' }}">
-                {% if r.reservation_type == 'abone' %}
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-3.33 0-6 1.79-6 4v1h12v-1c0-2.21-2.67-4-6-4z"/>
-                </svg>
-                {% else %}
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M12 2 4.5 5v6c0 5 3.41 9.74 7.5 11 4.09-1.26 7.5-6 7.5-11V5L12 2zm-1 14-3-3 1.41-1.41L11 13.17l4.59-4.58L17 10z"/>
-                </svg>
-                {% endif %}
-              </span>
-              <span class="slot-icon-badge {% if r.deposit_paid %}is-paid{% else %}is-pending{% endif %}" title="{{ 'Kapora Alındı' if r.deposit_paid else 'Kapora Bekliyor' }}" aria-label="{{ 'Kapora Alındı' if r.deposit_paid else 'Kapora Bekliyor' }}">
+  <div class="mobile-weekly-grid-shell">
+    <table class="table align-middle mobile-weekly-grid-table mb-0">
+      <thead>
+        <tr>
+          <th>Saat</th>
+          {% for d in days %}
+          <th>
+            <span class="mobile-weekday-label">{{ weekday_names_tr[d.weekday()] }}</span>
+            <span class="mobile-weekday-date">{{ d.strftime('%d.%m') }}</span>
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for h in hours %}
+        <tr>
+          <th>{{ hour_label(h) }}</th>
+          {% for d in days %}
+            {% set r = slot_map.get((d, h)) %}
+            <td>
+              {% if r %}
+              <a
+                href="{{ url_for('calendar.edit_reservation', reservation_id=r.id) }}"
+                class="mobile-week-slot is-booked {% if r.reservation_type == 'abone' %}is-subscriber{% else %}is-match{% endif %}"
+                aria-label="{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }} {{ hour_label(h) }} {{ r.customer_name }}"
+                title="{{ r.customer_name }} - {{ 'Abone' if r.reservation_type == 'abone' else 'Tek Saatlik Maç' }} - {{ 'Kapora Alındı' if r.deposit_paid else 'Kapora Bekliyor' }}">
+                <span class="mobile-week-slot-indicator"></span>
                 {% if r.deposit_paid %}
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="m9.55 18-5.66-5.66 1.41-1.41 4.25 4.24 8.49-8.48 1.41 1.41L9.55 18z"/>
-                </svg>
-                {% else %}
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M12 1.75A10.25 10.25 0 1 0 22.25 12 10.26 10.26 0 0 0 12 1.75zm1 10.66V6.5h-2v6.75l4.72 2.83 1-1.69z"/>
-                </svg>
+                <span class="mobile-week-slot-dot is-paid" aria-hidden="true"></span>
                 {% endif %}
-              </span>
-            </span>
-          </span>
-          <a href="{{ url_for('calendar.edit_reservation', reservation_id=r.id) }}" class="btn btn-sm btn-light mobile-slot-edit" aria-label="Rezervasyonu düzenle" title="Düzenle">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M4 15.75V20h4.25L18.81 9.44l-4.25-4.25L4 15.75zm16.71-9.04a1.003 1.003 0 0 0 0-1.42l-2-2a1.003 1.003 0 0 0-1.42 0l-1.59 1.59 4.25 4.25 1.76-1.76z"/>
-            </svg>
-          </a>
-        </div>
-        {% else %}
-        <button type="button" class="mobile-slot-item is-empty" data-bs-toggle="modal" data-bs-target="#reservationModal" data-date="{{ d }}" data-hour="{{ h }}">
-          <span class="mobile-slot-time">{{ hour_label(h) }}</span>
-          <span class="mobile-slot-main">
-            <strong>Boş slot</strong>
-            <small>Dokun ve hızlıca rezervasyona başla</small>
-          </span>
-          <span class="mobile-slot-cta">Seç</span>
-        </button>
-        {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-  </section>
-  {% endfor %}
+              </a>
+              {% else %}
+              <button
+                type="button"
+                class="mobile-week-slot is-empty"
+                data-bs-toggle="modal"
+                data-bs-target="#reservationModal"
+                data-date="{{ d }}"
+                data-hour="{{ h }}"
+                aria-label="{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }} {{ hour_label(h) }} boş slot"
+                title="Rezervasyon ekle">
+                <span class="mobile-week-slot-indicator"></span>
+              </button>
+              {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <div class="table-responsive calendar-wrap d-none d-lg-block">
