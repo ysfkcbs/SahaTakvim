@@ -103,17 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  const currentPath = window.location.pathname;
-  document.querySelectorAll('.mobile-bottom-link').forEach(link => {
-    const href = link.getAttribute('href');
-    if (!href) return;
-    if (href === '/') {
-      if (currentPath === '/') link.classList.add('is-active');
-      return;
-    }
-    if (currentPath.startsWith(href)) link.classList.add('is-active');
-  });
-
   const closingInputs = ['card_total_input', 'cash_total_input', 'iban_total_input']
     .map(id => document.getElementById(id))
     .filter(Boolean);

@@ -77,7 +77,7 @@ body.is-standalone .app-navbar {
 
 .app-main {
   width: min(100%, 1120px);
-  padding-bottom: 6rem;
+  padding-bottom: 2.5rem;
 }
 
 .page-title {
@@ -968,46 +968,6 @@ body.is-standalone .app-navbar {
   border-color: rgba(13, 110, 253, 0.26);
   background: linear-gradient(180deg, rgba(13, 110, 253, 0.16), rgba(13, 110, 253, 0.04));
   color: var(--app-primary-strong);
-}
-
-.mobile-bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
-  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(22, 46, 84, 0.08);
-  z-index: 1030;
-}
-
-body.is-standalone .mobile-bottom-nav {
-  padding-bottom: calc(0.9rem + env(safe-area-inset-bottom));
-}
-
-.mobile-bottom-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 3rem;
-  padding: 0.4rem 0.5rem;
-  border-radius: 0.9rem;
-  color: var(--app-text-soft);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mobile-bottom-link.is-active {
-  color: var(--app-primary-strong);
-  background: rgba(13, 110, 253, 0.08);
 }
 
 .table-responsive {

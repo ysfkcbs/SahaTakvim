@@ -55,19 +55,6 @@
     {% endwith %}
     {% block content %}{% endblock %}
   </main>
-
-  {% if current_user.is_authenticated %}
-  <nav class="mobile-bottom-nav d-lg-none" aria-label="Alt menü">
-    <a class="mobile-bottom-link" href="{{ url_for('main.index') }}">Ana Sayfa</a>
-    <a class="mobile-bottom-link" href="{{ url_for('calendar.weekly') }}">Takvim</a>
-    <a class="mobile-bottom-link" href="{{ url_for('finance.daily_closing') }}">Kasa</a>
-    {% if current_user.role == 'admin' %}
-    <a class="mobile-bottom-link" href="{{ url_for('reports.reservation_report') }}">Rapor</a>
-    {% else %}
-    <a class="mobile-bottom-link" href="{{ url_for('auth.logout') }}">Çıkış</a>
-    {% endif %}
-  </nav>
-  {% endif %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
