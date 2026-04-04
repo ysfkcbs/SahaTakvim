@@ -48,6 +48,10 @@
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
               <button class="btn btn-outline-{{ 'warning' if u.is_active_user else 'success' }}">{{ 'Pasife Al' if u.is_active_user else 'Aktifleştir' }}</button>
             </form>
+            <form method="post" action="{{ url_for('auth.delete_user', user_id=u.id) }}" onsubmit="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-outline-danger">Sil</button>
+            </form>
           </div>
         </div>
       </section>
@@ -72,6 +76,10 @@
                 <form method="post" action="{{ url_for('auth.toggle_user_status', user_id=u.id) }}" onsubmit="return confirm('Kullanıcı durumunu değiştirmek istiyor musunuz?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <button class="btn btn-sm btn-outline-{{ 'warning' if u.is_active_user else 'success' }}">{{ 'Pasife Al' if u.is_active_user else 'Aktifleştir' }}</button>
+                </form>
+                <form method="post" action="{{ url_for('auth.delete_user', user_id=u.id) }}" onsubmit="return confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-sm btn-outline-danger">Sil</button>
                 </form>
                 </div>
               </td>

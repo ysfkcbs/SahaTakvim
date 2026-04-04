@@ -131,3 +131,27 @@ def toggle_user_status(user_id):
     db.session.commit()
     flash("Kullanıcı durumu güncellendi.", "success")
     return redirect(url_for("auth.users"))
+
+
+@auth_bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@login_required
+@role_required("admin")
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if user.id == current_user.id:
+        flash("Kendi hesabınızı silemezsiniz.", "danger")
+        return redirect(url_for("auth.users"))
+
+    if _is_last_active_admin(user):
+        flash("Sistemde en az bir aktif admin kalmalıdır.", "danger")
+        return redirect(url_for("auth.users"))
+
+    if user.reservations.count() > 0 or user.closings.count() > 0:
+        flash("Bu kullanıcıya bağlı kayıtlar olduğu için silinemez.", "danger")
+        return redirect(url_for("auth.users"))
+
+    db.session.delete(user)
+    db.session.commit()
+    flash("Kullanıcı silindi.", "success")
+    return redirect(url_for("auth.users"))
