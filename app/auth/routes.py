@@ -1,5 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from sqlalchemy import func
 
 from app.extensions import db
 from app.main.utils import role_required
@@ -24,7 +25,8 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        username = form.username.data.strip()
+        user = User.query.filter(func.lower(User.username) == username.lower()).first()
         if user and user.check_password(form.password.data) and user.is_active_user:
             login_user(user, remember=True)
             flash("Hoş geldiniz!", "success")
