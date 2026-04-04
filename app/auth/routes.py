@@ -37,24 +37,31 @@ def login():
         password_ok = bool(user and user.check_password(form.password.data))
         is_active = bool(user and user.is_active_user)
         next_url = request.args.get("next") or url_for("main.index")
+        user_agent = request.headers.get("User-Agent", "-")
 
-        current_app.logger.info(
+        current_app.logger.warning(
             "LOGIN_ATTEMPT username=%s found=%s password_ok=%s active=%s ua=%s",
             username,
             bool(user),
             password_ok,
             is_active,
-            request.headers.get("User-Agent", "-"),
+            user_agent,
         )
 
         if user and password_ok and is_active:
             login_user(user, remember=True)
             flash("Hoş geldiniz!", "success")
-            current_app.logger.info("LOGIN_SUCCESS username=%s redirect=%s", username, next_url)
+            current_app.logger.warning("LOGIN_SUCCESS username=%s redirect=%s", username, next_url)
             return _no_store_response(make_response(redirect(next_url)))
 
         flash("Geçersiz giriş bilgileri.", "danger")
-        current_app.logger.warning("LOGIN_REJECTED username=%s", username)
+        current_app.logger.warning(
+            "LOGIN_REJECTED username=%s found=%s password_ok=%s active=%s",
+            username,
+            bool(user),
+            password_ok,
+            is_active,
+        )
 
     return _no_store_response(make_response(render_template("auth/login.html", form=form)))
 
