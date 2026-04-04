@@ -1,9 +1,12 @@
-const CACHE_NAME = 'saha-takvim-shell-v5';
+const CACHE_NAME = 'saha-takvim-shell-v6';
 const APP_SHELL = [
   '/manifest.webmanifest',
   '/static/css/style.css',
   '/static/js/app.js',
-  '/static/icons/app-icon.svg'
+  '/static/icons/app-icon.svg',
+  '/static/icons/app-icon-192.png',
+  '/static/icons/app-icon-512.png',
+  '/static/icons/apple-touch-icon-180.png'
 ];
 
 self.addEventListener('install', event => {

@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, flash, make_response, redirect, render_template, request, url_for
+from flask import Blueprint, flash, make_response, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 
@@ -34,34 +34,12 @@ def login():
     if form.validate_on_submit():
         username = form.username.data.strip()
         user = User.query.filter(func.lower(User.username) == username.lower()).first()
-        password_ok = bool(user and user.check_password(form.password.data))
-        is_active = bool(user and user.is_active_user)
-        next_url = request.args.get("next") or url_for("main.index")
-        user_agent = request.headers.get("User-Agent", "-")
-
-        current_app.logger.warning(
-            "LOGIN_ATTEMPT username=%s found=%s password_ok=%s active=%s ua=%s",
-            username,
-            bool(user),
-            password_ok,
-            is_active,
-            user_agent,
-        )
-
-        if user and password_ok and is_active:
+        if user and user.check_password(form.password.data) and user.is_active_user:
             login_user(user, remember=True)
             flash("Hoş geldiniz!", "success")
-            current_app.logger.warning("LOGIN_SUCCESS username=%s redirect=%s", username, next_url)
-            return _no_store_response(make_response(redirect(next_url)))
+            return _no_store_response(make_response(redirect(request.args.get("next") or url_for("main.index"))))
 
         flash("Geçersiz giriş bilgileri.", "danger")
-        current_app.logger.warning(
-            "LOGIN_REJECTED username=%s found=%s password_ok=%s active=%s",
-            username,
-            bool(user),
-            password_ok,
-            is_active,
-        )
 
     return _no_store_response(make_response(render_template("auth/login.html", form=form)))
 
@@ -69,10 +47,8 @@ def login():
 @auth_bp.route("/logout")
 @login_required
 def logout():
-    username = current_user.username
     logout_user()
     flash("Oturum kapatıldı.", "info")
-    current_app.logger.info("LOGOUT username=%s", username)
     return _no_store_response(make_response(redirect(url_for("auth.login"))))
 
 

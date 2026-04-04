@@ -2,43 +2,49 @@
 {% block content %}
 <div class="page-header mb-4">
   <div>
-    <h2 class="page-title">Admin Dashboard</h2>
+    <h2 class="page-title mb-0">Yönetim Paneli</h2>
     <p class="page-subtitle">Rezervasyon, finans ve saha yönetimini tek ekrandan takip edin.</p>
   </div>
 </div>
 <div class="row g-3 mb-4">
-  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Bu Hafta Rez.</small><h4>{{ reservations_week }}</h4></div></div></div>
-  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Bu Ay Rez.</small><h4>{{ reservations_month }}</h4></div></div></div>
-  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Gelir</small><h4>₺{{ '%.0f'|format(month_income|float) }}</h4></div></div></div>
-  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Gider</small><h4>₺{{ '%.0f'|format(month_expenses|float) }}</h4></div></div></div>
-  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Net</small><h4>₺{{ '%.0f'|format(net_result|float) }}</h4></div></div></div>
-  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Aktif Saha</small><h4>{{ active_fields }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card dashboard-kpi-card"><div class="card-body"><small>Bu Hafta Rez.</small><h4>{{ reservations_week }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card dashboard-kpi-card"><div class="card-body"><small>Bu Ay Rez.</small><h4>{{ reservations_month }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card dashboard-kpi-card"><div class="card-body"><small>Gelir</small><h4>₺{{ '%.0f'|format(month_income|float) }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card dashboard-kpi-card"><div class="card-body"><small>Gider</small><h4>₺{{ '%.0f'|format(month_expenses|float) }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card dashboard-kpi-card"><div class="card-body"><small>Net</small><h4>₺{{ '%.0f'|format(net_result|float) }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card dashboard-kpi-card"><div class="card-body"><small>Aktif Saha</small><h4>{{ active_fields }}</h4></div></div></div>
 </div>
 <div class="row g-4">
   <div class="col-lg-7">
-    <div class="card"><div class="card-header">Yaklaşan Rezervasyonlar</div><div class="card-body">
-      <table class="table table-hover mobile-stack-table">
-        <thead><tr><th>Tarih</th><th>Saat</th><th>Ad</th><th>Tür</th><th>Kapora</th></tr></thead>
-        <tbody>
-        {% for r in upcoming %}
-        <tr>
-          <td data-label="Tarih">{{r.reservation_date}}</td>
-          <td data-label="Saat">{{'%02d:00'|format(r.reservation_hour)}}</td>
-          <td data-label="Ad">{{r.customer_name}}</td>
-          <td data-label="Tür"><span class="badge bg-{{'primary' if r.reservation_type=='abone' else 'secondary'}}">{{r.reservation_type}}</span></td>
-          <td data-label="Kapora">{{'✅' if r.deposit_paid else '⏳'}}</td>
-        </tr>
-        {% else %}
-        <tr><td colspan="5">Kayıt yok.</td></tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div></div>
+    <div class="card">
+      <div class="card-header">Yaklaşan Rezervasyonlar</div>
+      <div class="card-body">
+        <table class="table table-hover mobile-stack-table">
+          <thead><tr><th>Tarih</th><th>Saat</th><th>Ad</th><th>Tür</th><th>Kapora</th></tr></thead>
+          <tbody>
+          {% for r in upcoming %}
+          <tr>
+            <td data-label="Tarih">{{r.reservation_date}}</td>
+            <td data-label="Saat">{{'%02d:00'|format(r.reservation_hour)}}</td>
+            <td data-label="Ad">{{r.customer_name}}</td>
+            <td data-label="Tür"><span class="dashboard-status-badge {{ 'is-subscriber' if r.reservation_type == 'abone' else 'is-match' }}">{{ 'Abone' if r.reservation_type == 'abone' else 'Tek Saatlik' }}</span></td>
+            <td data-label="Kapora"><span class="dashboard-status-badge {{ 'is-paid' if r.deposit_paid else 'is-pending' }}">{{ 'Alındı' if r.deposit_paid else 'Bekliyor' }}</span></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="dashboard-empty-row">Yaklaşan rezervasyon yok.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
   <div class="col-lg-5">
-    <div class="card"><div class="card-header">Son Gün Sonu Kayıtları</div><div class="card-body">
-      <ul class="list-group list-group-flush">{% for c in daily_closings %}<li class="list-group-item d-flex justify-content-between"><span>{{c.closing_date}}</span><strong>₺{{ '%.0f'|format((c.card_total|float) + (c.cash_total|float) + (c.iban_total|float)) }}</strong></li>{% else %}<li class="list-group-item">Kayıt yok.</li>{% endfor %}</ul>
-    </div></div>
+    <div class="card">
+      <div class="card-header">Son Gün Sonu Kayıtları</div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush dashboard-list">{% for c in daily_closings %}<li class="list-group-item dashboard-list-item"><span>{{c.closing_date}}</span><strong>₺{{ '%.0f'|format((c.card_total|float) + (c.cash_total|float) + (c.iban_total|float)) }}</strong></li>{% else %}<li class="list-group-item dashboard-empty-row">Kayıt yok.</li>{% endfor %}</ul>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

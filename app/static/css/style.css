@@ -127,6 +127,59 @@ body.is-standalone .app-navbar {
   font-weight: 600;
 }
 
+.dashboard-kpi-card .card-body {
+  height: 100%;
+}
+
+.dashboard-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.dashboard-status-badge.is-subscriber {
+  color: #11653d;
+  background: rgba(25, 135, 84, 0.14);
+}
+
+.dashboard-status-badge.is-match {
+  color: #a14d00;
+  background: rgba(253, 126, 20, 0.16);
+}
+
+.dashboard-status-badge.is-paid {
+  color: #11653d;
+  background: rgba(25, 135, 84, 0.14);
+}
+
+.dashboard-status-badge.is-pending {
+  color: #8a5a00;
+  background: rgba(255, 193, 7, 0.2);
+}
+
+.dashboard-list {
+  gap: 0.65rem;
+}
+
+.dashboard-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-inline: 0;
+  border-color: rgba(22, 46, 84, 0.08);
+}
+
+.dashboard-empty-row {
+  color: var(--app-text-soft);
+}
+
 .page-header,
 .page-header-stack {
   display: flex;
@@ -1199,6 +1252,11 @@ body.is-standalone .mobile-bottom-nav {
 
   .mobile-stack-table td[colspan]::before {
     content: none;
+  }
+
+  .dashboard-list-item {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .admin-item-head,
