@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app.calendar.forms import ReservationForm
@@ -34,6 +34,18 @@ def weekly():
         Reservation.query.filter(Reservation.reservation_date.between(start, end), Reservation.status == "active")
         .filter(Reservation.field_id == selected_field if selected_field else True)
         .all()
+    )
+
+    current_app.logger.warning(
+        "CALENDAR_WEEKLY_VIEW user=%s role=%s field_id=%s field_name=%s start=%s end=%s reservations=%s ua=%s",
+        current_user.username,
+        current_user.role,
+        selected_field,
+        selected_field_obj.name if selected_field_obj else None,
+        start.isoformat(),
+        end.isoformat(),
+        len(reservations),
+        request.headers.get("User-Agent", "")[:180],
     )
 
     slot_map = {(r.reservation_date, r.reservation_hour): r for r in reservations}
@@ -71,6 +83,17 @@ def create_reservation():
     form.reservation_hour.choices = [(h, hour_label(h)) for h in business_hours()]
 
     if form.validate_on_submit():
+        current_app.logger.warning(
+            "CALENDAR_CREATE_ATTEMPT user=%s role=%s field_id=%s date=%s hour=%s type=%s customer=%s ua=%s",
+            current_user.username,
+            current_user.role,
+            form.field_id.data,
+            form.reservation_date.data.isoformat() if form.reservation_date.data else None,
+            form.reservation_hour.data,
+            form.reservation_type.data,
+            form.customer_name.data,
+            request.headers.get("User-Agent", "")[:180],
+        )
         exists = Reservation.query.filter_by(
             field_id=form.field_id.data,
             reservation_date=form.reservation_date.data,
@@ -78,6 +101,15 @@ def create_reservation():
             status="active",
         ).first()
         if exists:
+            current_app.logger.warning(
+                "CALENDAR_CREATE_CONFLICT user=%s role=%s field_id=%s date=%s hour=%s existing_id=%s",
+                current_user.username,
+                current_user.role,
+                form.field_id.data,
+                form.reservation_date.data.isoformat() if form.reservation_date.data else None,
+                form.reservation_hour.data,
+                exists.id,
+            )
             flash("Bu saha ve saat için mevcut bir rezervasyon var.", "danger")
         else:
             r = Reservation(
@@ -93,7 +125,28 @@ def create_reservation():
             )
             db.session.add(r)
             db.session.commit()
+            current_app.logger.warning(
+                "CALENDAR_CREATE_SUCCESS user=%s role=%s reservation_id=%s field_id=%s date=%s hour=%s type=%s",
+                current_user.username,
+                current_user.role,
+                r.id,
+                r.field_id,
+                r.reservation_date.isoformat(),
+                r.reservation_hour,
+                r.reservation_type,
+            )
             flash("Rezervasyon oluşturuldu.", "success")
+    else:
+        current_app.logger.warning(
+            "CALENDAR_CREATE_INVALID user=%s role=%s field_id=%s date=%s hour=%s errors=%s ua=%s",
+            current_user.username,
+            current_user.role,
+            form.field_id.data,
+            form.reservation_date.data.isoformat() if form.reservation_date.data else None,
+            form.reservation_hour.data,
+            form.errors,
+            request.headers.get("User-Agent", "")[:180],
+        )
 
     return redirect(url_for("calendar.weekly", start=form.reservation_date.data.isoformat(), field=form.field_id.data))
 
