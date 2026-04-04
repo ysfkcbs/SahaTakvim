@@ -3,7 +3,7 @@ services:
     name: saha-takvim
     env: python
     plan: starter
-    buildCommand: pip install -r requirements.txt && flask db upgrade
+    buildCommand: pip install -r requirements.txt && flask db upgrade && flask seed-admin
     startCommand: gunicorn wsgi:app
     envVars:
       - key: FLASK_ENV
@@ -14,6 +14,10 @@ services:
         fromDatabase:
           name: saha-db
           property: connectionString
+      - key: DEFAULT_ADMIN_USERNAME
+        value: admin
+      - key: DEFAULT_ADMIN_PASSWORD
+        sync: false
 
 databases:
   - name: saha-db

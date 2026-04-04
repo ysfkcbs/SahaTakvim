@@ -105,15 +105,17 @@ Admin can:
 - `SECRET_KEY`
 - `DATABASE_URL` (Render PostgreSQL URL)
 - `FLASK_ENV=production`
+- `DEFAULT_ADMIN_USERNAME` (optional but recommended for first seed)
+- `DEFAULT_ADMIN_PASSWORD` (optional but recommended for first seed)
 
 ### Start command
 ```bash
-gunicorn run:app
+gunicorn wsgi:app
 ```
 
 ### Build command (recommended)
 ```bash
-pip install -r requirements.txt && flask db upgrade
+pip install -r requirements.txt && flask db upgrade && flask seed-admin
 ```
 
 ## Docker-ready Notes (future)
