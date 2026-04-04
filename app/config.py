@@ -33,6 +33,13 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REMEMBER_COOKIE_DURATION = timedelta(days=7)
     SQLALCHEMY_DATABASE_URI = build_database_uri()
+    SESSION_COOKIE_NAME = "saha_takvim_session"
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = os.getenv("FLASK_ENV", "development") == "production"
+    REMEMBER_COOKIE_SECURE = os.getenv("FLASK_ENV", "development") == "production"
 
 
 class DevelopmentConfig(Config):
