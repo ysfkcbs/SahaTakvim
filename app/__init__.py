@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 
 from .extensions import csrf, db, login_manager, migrate
 
@@ -21,6 +21,15 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     csrf.init_app(app)
+
+    @app.after_request
+    def disable_dynamic_html_cache(response):
+        # Keep authenticated calendar/dashboard pages fresh across mobile browsers and PWA shells.
+        if request.method == "GET" and response.mimetype == "text/html":
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0, private"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
 
     @login_manager.user_loader
     def load_user(user_id):
