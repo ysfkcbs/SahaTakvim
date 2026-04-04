@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('reservationModal');
   const dateInput = document.getElementById('reservation_date_input');
   const hourInput = document.getElementById('reservation_hour_input');
+  const fieldInput = document.getElementById('reservation_field_input');
+  const fieldDisplay = document.getElementById('reservation_field_display');
   const reservationTypeInput = document.getElementById('reservation_type_input');
   const reservationSummary = document.getElementById('reservation_summary');
 
@@ -51,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!reservationSummary || !dateInput || !hourInput) return;
     const dateValue = dateInput.value || 'Tarih seçilmedi';
     const hourValue = hourInput.options[hourInput.selectedIndex]?.text || hourInput.value || 'Saat seçilmedi';
-    reservationSummary.textContent = `${dateValue} • ${hourValue} için rezervasyon oluşturuluyor.`;
+    const fieldValue = fieldDisplay?.textContent?.trim() || 'Saha seçilmedi';
+    reservationSummary.textContent = `${dateValue} • ${hourValue} • ${fieldValue} için rezervasyon oluşturuluyor.`;
   };
 
   if (modal) {
@@ -60,6 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!cell || !cell.dataset) return;
       if (dateInput) dateInput.value = cell.dataset.date;
       if (hourInput) hourInput.value = cell.dataset.hour;
+      const selectedField = cell.dataset.field || modal.dataset.selectedField;
+      if (fieldInput && selectedField) {
+        fieldInput.value = selectedField;
+      }
+      if (fieldDisplay) {
+        fieldDisplay.textContent = modal.dataset.selectedFieldName || fieldDisplay.textContent;
+      }
       syncReservationSummary();
       syncReservationTypeButtons();
     });

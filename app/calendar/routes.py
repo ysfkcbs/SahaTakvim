@@ -25,6 +25,7 @@ def weekly():
     fields = Field.query.filter_by(is_active=True).order_by(Field.name.asc()).all()
     if not selected_field and fields:
         selected_field = fields[0].id
+    selected_field_obj = next((field for field in fields if field.id == selected_field), None)
 
     hours = business_hours()
     days = [start + timedelta(days=i) for i in range(7)]
@@ -54,6 +55,7 @@ def weekly():
         slot_map=slot_map,
         fields=fields,
         selected_field=selected_field,
+        selected_field_obj=selected_field_obj,
         form=form,
         prev_week=start - timedelta(days=7),
         next_week=start + timedelta(days=7),
