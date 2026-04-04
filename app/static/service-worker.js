@@ -1,4 +1,4 @@
-const CACHE_NAME = 'saha-takvim-shell-v4';
+const CACHE_NAME = 'saha-takvim-shell-v5';
 const APP_SHELL = [
   '/manifest.webmanifest',
   '/static/css/style.css',
@@ -27,14 +27,9 @@ self.addEventListener('fetch', event => {
 
   const requestUrl = new URL(event.request.url);
   const isSameOrigin = requestUrl.origin === self.location.origin;
-  const isStaticAsset =
-    isSameOrigin &&
-    (
-      requestUrl.pathname.startsWith('/static/') ||
-      requestUrl.pathname === '/manifest.webmanifest'
-    );
+  const isShellAsset = isSameOrigin && APP_SHELL.includes(requestUrl.pathname);
 
-  if (!isStaticAsset) {
+  if (!isShellAsset) {
     return;
   }
 

@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Rezervasyon Düzenle</h3>
+<div class="page-header mb-3">
+  <div>
+    <h3 class="page-title mb-0">Rezervasyon Düzenle</h3>
+    <p class="page-subtitle">Rezervasyon detaylarını mobilde taşmadan düzenleyin veya gerektiğinde iptal edin.</p>
+  </div>
+</div>
 <form method="post" class="card card-body mb-3">
   {{ form.hidden_tag() }}
   <div class="row g-3">

@@ -1,14 +1,17 @@
 {
+  "id": "/",
   "name": "Saha Takvim",
   "short_name": "SahaTakvim",
-  "description": "Saha rezervasyon, takvim ve gün sonu işlemlerini mobilde hızlı yönetin.",
+  "description": "Saha rezervasyon, takvim ve gun sonu islemlerini mobilde hizli yonetin.",
   "lang": "tr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#f7f7f2",
   "theme_color": "#111928",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/static/icons/app-icon.svg",

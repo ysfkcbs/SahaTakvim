@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const isStandalone =
+    window.matchMedia?.('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+  document.body.classList.toggle('is-standalone', Boolean(isStandalone));
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/service-worker.js').catch(() => {

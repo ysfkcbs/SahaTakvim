@@ -31,6 +31,10 @@ body {
     linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg-end) 100%);
 }
 
+body.is-standalone {
+  min-height: 100dvh;
+}
+
 a {
   text-decoration: none;
 }
@@ -46,6 +50,10 @@ a {
   padding: 0.85rem 0;
   background: rgba(17, 25, 40, 0.92) !important;
   backdrop-filter: blur(14px);
+}
+
+body.is-standalone .app-navbar {
+  padding-top: calc(0.85rem + env(safe-area-inset-top));
 }
 
 .brand-mark {
@@ -657,41 +665,25 @@ a {
   fill: currentColor;
 }
 
-.slot-state-pill.is-subscriber {
-  color: #11653d;
-  background: rgba(25, 135, 84, 0.18);
-}
-
+.slot-state-pill.is-subscriber,
 .slot-icon-badge.is-subscriber {
   color: #1f6b45;
   background: rgba(25, 135, 84, 0.12);
 }
 
-.slot-state-pill.is-match {
-  color: #9a4b00;
-  background: rgba(253, 126, 20, 0.2);
-}
-
+.slot-state-pill.is-match,
 .slot-icon-badge.is-match {
   color: #a85a12;
   background: rgba(253, 126, 20, 0.12);
 }
 
-.slot-state-pill.is-paid {
-  color: #11653d;
-  background: rgba(25, 135, 84, 0.16);
-}
-
+.slot-state-pill.is-paid,
 .slot-icon-badge.is-paid {
   color: #1f6b45;
   background: rgba(25, 135, 84, 0.1);
 }
 
-.slot-state-pill.is-pending {
-  color: #8a5a00;
-  background: rgba(255, 193, 7, 0.24);
-}
-
+.slot-state-pill.is-pending,
 .slot-icon-badge.is-pending {
   color: #9a6a14;
   background: rgba(255, 193, 7, 0.14);
@@ -701,8 +693,8 @@ a {
 .mobile-slot-edit {
   display: inline-grid;
   place-items: center;
-  width: 1.95rem;
-  height: 1.95rem;
+  width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
   border-radius: 999px;
   flex: 0 0 auto;
@@ -940,6 +932,10 @@ a {
   z-index: 1030;
 }
 
+body.is-standalone .mobile-bottom-nav {
+  padding-bottom: calc(0.9rem + env(safe-area-inset-bottom));
+}
+
 .mobile-bottom-link {
   display: inline-flex;
   align-items: center;
@@ -968,6 +964,21 @@ a {
 .mobile-stack-table td,
 .mobile-stack-table th {
   vertical-align: middle;
+}
+
+.mobile-stack-table td {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mobile-stack-table td[data-label] > :not(form),
+.mobile-stack-table td[data-label] > form > * {
+  max-width: 100%;
+}
+
+.mobile-stack-table td[colspan] {
+  text-align: center;
+  color: var(--app-text-soft);
 }
 
 .mobile-stack-table .action-cell {
@@ -1175,8 +1186,19 @@ a {
     font-weight: 700;
   }
 
-  .mobile-stack-table td > * {
+  .mobile-stack-table td > *,
+  .mobile-stack-table td > form {
     min-width: 0;
+  }
+
+  .mobile-stack-table td[colspan] {
+    display: block;
+    padding: 0.2rem 0;
+    text-align: left;
+  }
+
+  .mobile-stack-table td[colspan]::before {
+    content: none;
   }
 
   .admin-item-head,
@@ -1217,6 +1239,10 @@ a {
 
   .page-title {
     font-size: 1.45rem;
+  }
+
+  .page-subtitle {
+    line-height: 1.5;
   }
 
   .daily-closing-topbar {
@@ -1282,6 +1308,11 @@ a {
 
   .mobile-slot-main {
     gap: 0.2rem;
+  }
+
+  .mobile-slot-time,
+  .mobile-slot-cta {
+    font-size: 0.95rem;
   }
 
   .reservation-type-grid {

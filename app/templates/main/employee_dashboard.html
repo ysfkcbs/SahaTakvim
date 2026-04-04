@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2 class="page-title">Çalışan Paneli</h2>
+<div class="page-header mb-3">
+  <div>
+    <h2 class="page-title mb-0">Çalışan Paneli</h2>
+    <p class="page-subtitle">Günlük operasyonlara mobilden hızlı erişin ve bugünkü rezervasyonları takip edin.</p>
+  </div>
+</div>
 <div class="d-grid d-md-flex gap-2 mb-3">
   <a class="btn btn-primary btn-lg" href="{{ url_for('calendar.weekly') }}">Haftalık Takvim</a>
   <a class="btn btn-outline-primary btn-lg" href="{{ url_for('finance.daily_closing') }}">Gün Sonu Kapanışı</a>
