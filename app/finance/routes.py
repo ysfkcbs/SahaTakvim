@@ -1,19 +1,84 @@
+from datetime import date
+from decimal import Decimal
+
 from flask import Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
 from app.extensions import db
-from app.finance.forms import DailyClosingForm, ExpenseForm, IncomeForm
+from app.finance.forms import DailyClosingForm, TransactionForm
 from app.finance.services import actual_total, forecast_next_months, reservation_income_for_month
 from app.main.utils import role_required
-from app.models import DailyClosing, Expense, ExpenseCategory, Income, IncomeCategory
+from app.models import DailyClosing, Expense, Income
 
 
 finance_bp = Blueprint("finance", __name__)
+
 
 def _flash_form_errors(form):
     for field, errors in form.errors.items():
         for error in errors:
             flash(f"{getattr(form, field).label.text}: {error}", "danger")
+
+
+def _build_transaction_rows():
+    rows = []
+    for record in Income.query.order_by(Income.date.desc(), Income.id.desc()).all():
+        rows.append(
+            {
+                "id": record.id,
+                "kind": "income",
+                "kind_label": "Gelir",
+                "title": record.title,
+                "amount": record.amount,
+                "date": record.date,
+                "description": record.description,
+                "is_recurring": record.is_recurring,
+                "is_paid": record.is_paid,
+                "edit_url": url_for("finance.edit_income", record_id=record.id),
+                "delete_url": url_for("finance.delete_income", record_id=record.id),
+            }
+        )
+
+    for record in Expense.query.order_by(Expense.date.desc(), Expense.id.desc()).all():
+        rows.append(
+            {
+                "id": record.id,
+                "kind": "expense",
+                "kind_label": "Gider",
+                "title": record.title,
+                "amount": record.amount,
+                "date": record.date,
+                "description": record.description,
+                "is_recurring": record.is_recurring,
+                "is_paid": record.is_paid,
+                "edit_url": url_for("finance.edit_expense", record_id=record.id),
+                "delete_url": url_for("finance.delete_expense", record_id=record.id),
+            }
+        )
+
+    rows.sort(key=lambda item: (item["date"], item["id"]), reverse=True)
+    return rows
+
+
+def _render_balance_page(form, editing_record=None, form_mode_title="Yeni Kayıt", submit_label="Kaydet"):
+    from datetime import date
+
+    today = date.today()
+    month_income = reservation_income_for_month(today.year, today.month) + actual_total(Income, today.year, today.month)
+    month_expense = actual_total(Expense, today.year, today.month)
+    projection = forecast_next_months(3)
+    return render_template(
+        "finance/forecast.html",
+        month_income=month_income,
+        month_expense=month_expense,
+        projection=projection,
+        form=form,
+        records=_build_transaction_rows(),
+        editing_record=editing_record,
+        form_mode_title=form_mode_title,
+        submit_label=submit_label,
+        cancel_url=url_for("finance.forecast"),
+    )
 
 
 @finance_bp.route("/daily-closing", methods=["GET", "POST"])
@@ -37,87 +102,145 @@ def daily_closing():
         _flash_form_errors(form)
 
     closings = DailyClosing.query.order_by(DailyClosing.closing_date.desc()).all()
-    return render_template("finance/daily_closing.html", form=form, closings=closings)
+    today = date.today()
+    month_closings = [closing for closing in closings if closing.closing_date.year == today.year and closing.closing_date.month == today.month]
+    month_card_total = sum((closing.card_total or Decimal("0")) for closing in month_closings)
+    month_cash_total = sum((closing.cash_total or Decimal("0")) for closing in month_closings)
+    month_iban_total = sum((closing.iban_total or Decimal("0")) for closing in month_closings)
+    return render_template(
+        "finance/daily_closing.html",
+        form=form,
+        closings=closings,
+        month_card_total=month_card_total,
+        month_cash_total=month_cash_total,
+        month_iban_total=month_iban_total,
+        current_month_label=today.strftime("%m.%Y"),
+    )
 
 
-@finance_bp.route("/incomes", methods=["GET", "POST"])
+@finance_bp.route("/incomes")
 @login_required
 @role_required("admin")
 def incomes():
-    form = IncomeForm()
-    if form.validate_on_submit():
-        cat = None
-        if form.category.data:
-            cat = IncomeCategory.query.filter_by(name=form.category.data.strip()).first()
-            if not cat:
-                cat = IncomeCategory(name=form.category.data.strip())
-                db.session.add(cat)
-                db.session.flush()
-        db.session.add(
-            Income(
-                title=form.title.data,
-                amount=form.amount.data,
-                date=form.date.data,
-                description=form.description.data,
-                is_recurring=form.is_recurring.data,
-                recurrence=form.recurrence.data,
-                category_id=cat.id if cat else None,
-            )
-        )
-        db.session.commit()
-        flash("Gelir kaydı eklendi.", "success")
-        return redirect(url_for("finance.incomes"))
-    elif form.is_submitted():
-        _flash_form_errors(form)
-
-    records = Income.query.order_by(Income.date.desc()).all()
-    return render_template("finance/incomes.html", form=form, records=records)
+    return redirect(url_for("finance.forecast"))
 
 
-@finance_bp.route("/expenses", methods=["GET", "POST"])
+@finance_bp.route("/expenses")
 @login_required
 @role_required("admin")
 def expenses():
-    form = ExpenseForm()
+    return redirect(url_for("finance.forecast"))
+
+
+@finance_bp.route("/incomes/<int:record_id>/edit", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def edit_income(record_id):
+    record = Income.query.get_or_404(record_id)
+    form = TransactionForm(
+        transaction_kind="income",
+        title=record.title,
+        amount=record.amount,
+        date=record.date,
+        description=record.description,
+        is_recurring=record.is_recurring,
+        is_paid=record.is_paid,
+        recurrence=record.recurrence,
+    )
+
     if form.validate_on_submit():
-        cat = None
-        if form.category.data:
-            cat = ExpenseCategory.query.filter_by(name=form.category.data.strip()).first()
-            if not cat:
-                cat = ExpenseCategory(name=form.category.data.strip())
-                db.session.add(cat)
-                db.session.flush()
-        db.session.add(
-            Expense(
-                title=form.title.data,
-                amount=form.amount.data,
-                date=form.date.data,
-                description=form.description.data,
-                is_recurring=form.is_recurring.data,
-                recurrence=form.recurrence.data,
-                category_id=cat.id if cat else None,
-            )
-        )
+        record.title = form.title.data
+        record.amount = form.amount.data
+        record.date = form.date.data
+        record.description = form.description.data
+        record.is_recurring = form.is_recurring.data
+        record.is_paid = form.is_paid.data
+        record.recurrence = form.recurrence.data
         db.session.commit()
-        flash("Gider kaydı eklendi.", "success")
-        return redirect(url_for("finance.expenses"))
+        flash("Gelir kaydı güncellendi.", "success")
+        return redirect(url_for("finance.forecast"))
     elif form.is_submitted():
         _flash_form_errors(form)
 
-    records = Expense.query.order_by(Expense.date.desc()).all()
-    return render_template("finance/expenses.html", form=form, records=records)
+    return _render_balance_page(form, editing_record=record, form_mode_title="Gelir Düzenle", submit_label="Kaydı Güncelle")
 
 
-@finance_bp.route("/forecast")
+@finance_bp.route("/expenses/<int:record_id>/edit", methods=["GET", "POST"])
+@login_required
+@role_required("admin")
+def edit_expense(record_id):
+    record = Expense.query.get_or_404(record_id)
+    form = TransactionForm(
+        transaction_kind="expense",
+        title=record.title,
+        amount=record.amount,
+        date=record.date,
+        description=record.description,
+        is_recurring=record.is_recurring,
+        is_paid=record.is_paid,
+        recurrence=record.recurrence,
+    )
+
+    if form.validate_on_submit():
+        record.title = form.title.data
+        record.amount = form.amount.data
+        record.date = form.date.data
+        record.description = form.description.data
+        record.is_recurring = form.is_recurring.data
+        record.is_paid = form.is_paid.data
+        record.recurrence = form.recurrence.data
+        db.session.commit()
+        flash("Gider kaydı güncellendi.", "success")
+        return redirect(url_for("finance.forecast"))
+    elif form.is_submitted():
+        _flash_form_errors(form)
+
+    return _render_balance_page(form, editing_record=record, form_mode_title="Gider Düzenle", submit_label="Kaydı Güncelle")
+
+
+@finance_bp.route("/incomes/<int:record_id>/delete", methods=["POST"])
+@login_required
+@role_required("admin")
+def delete_income(record_id):
+    record = Income.query.get_or_404(record_id)
+    db.session.delete(record)
+    db.session.commit()
+    flash("Gelir kaydı silindi.", "warning")
+    return redirect(url_for("finance.forecast"))
+
+
+@finance_bp.route("/expenses/<int:record_id>/delete", methods=["POST"])
+@login_required
+@role_required("admin")
+def delete_expense(record_id):
+    record = Expense.query.get_or_404(record_id)
+    db.session.delete(record)
+    db.session.commit()
+    flash("Gider kaydı silindi.", "warning")
+    return redirect(url_for("finance.forecast"))
+
+
+@finance_bp.route("/forecast", methods=["GET", "POST"])
 @login_required
 @role_required("admin")
 def forecast():
-    from datetime import date
+    form = TransactionForm()
+    if form.validate_on_submit():
+        model = Income if form.transaction_kind.data == "income" else Expense
+        record = model(
+            title=form.title.data,
+            amount=form.amount.data,
+            date=form.date.data,
+            description=form.description.data,
+            is_recurring=form.is_recurring.data,
+            is_paid=form.is_paid.data,
+            recurrence=form.recurrence.data,
+        )
+        db.session.add(record)
+        db.session.commit()
+        flash("Kayıt eklendi.", "success")
+        return redirect(url_for("finance.forecast"))
+    elif form.is_submitted():
+        _flash_form_errors(form)
 
-    today = date.today()
-    month_income = reservation_income_for_month(today.year, today.month) + actual_total(Income, today.year, today.month)
-    month_expense = actual_total(Expense, today.year, today.month)
-    projection = forecast_next_months(3)
-    return render_template(
-        "finance/forecast.html", month_income=month_income, month_expense=month_expense, projection=projection
-    )
+    return _render_balance_page(form, editing_record=None, form_mode_title="Yeni Kayıt", submit_label="Kaydet")

@@ -7,15 +7,6 @@ from wtforms.validators import DataRequired, NumberRange, Optional
 
 
 def normalize_decimal_input(value):
-    """Accept Turkish/international number formats and return Decimal.
-
-    Supported examples:
-    - 4430
-    - 1250.50
-    - 1250,50
-    - 1.250,50
-    - 1,250.50
-    """
     if value is None:
         return value
 
@@ -36,7 +27,6 @@ def normalize_decimal_input(value):
     has_comma = "," in text
 
     if has_dot and has_comma:
-        # whichever appears last is treated as decimal separator
         if text.rfind(",") > text.rfind("."):
             text = text.replace(".", "").replace(",", ".")
         else:
@@ -59,23 +49,13 @@ class DailyClosingForm(FlaskForm):
     submit = SubmitField("Kapanışı Kaydet")
 
 
-class IncomeForm(FlaskForm):
+class TransactionForm(FlaskForm):
+    transaction_kind = SelectField("Kategori", choices=[("income", "Gelir"), ("expense", "Gider")], validators=[DataRequired()])
     title = StringField("Başlık", validators=[DataRequired()])
-    category = StringField("Kategori", validators=[Optional()])
     amount = DecimalField("Tutar", validators=[DataRequired(), NumberRange(min=0)], filters=[normalize_decimal_input])
     date = DateField("Tarih", validators=[DataRequired()], default=date.today)
     description = TextAreaField("Açıklama", validators=[Optional()])
     is_recurring = BooleanField("Sabit (Tekrarlayan)")
+    is_paid = BooleanField("Ödendi")
     recurrence = SelectField("Tekrar", choices=[("monthly", "Aylık"), ("yearly", "Yıllık")])
-    submit = SubmitField("Gelir Kaydet")
-
-
-class ExpenseForm(FlaskForm):
-    title = StringField("Başlık", validators=[DataRequired()])
-    category = StringField("Kategori", validators=[Optional()])
-    amount = DecimalField("Tutar", validators=[DataRequired(), NumberRange(min=0)], filters=[normalize_decimal_input])
-    date = DateField("Tarih", validators=[DataRequired()], default=date.today)
-    description = TextAreaField("Açıklama", validators=[Optional()])
-    is_recurring = BooleanField("Sabit (Tekrarlayan)")
-    recurrence = SelectField("Tekrar", choices=[("monthly", "Aylık"), ("yearly", "Yıllık")])
-    submit = SubmitField("Gider Kaydet")
+    submit = SubmitField("Kaydet")

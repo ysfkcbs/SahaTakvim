@@ -1,7 +1,55 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="d-flex justify-content-between mb-3"><h3>Saha Yönetimi</h3><a class="btn btn-primary" href="{{ url_for('fields.create_field') }}">Yeni Saha</a></div>
-<table class="table table-striped"><tr><th>Ad</th><th>Tek Saatlik</th><th>Abone</th><th>Saat</th><th>Durum</th><th></th></tr>
-{% for f in fields %}<tr><td>{{f.name}}</td><td>₺{{f.rental_price}}</td><td>₺{{f.subscription_price}}</td><td>{{'%02d:00'|format(f.open_hour)}}-{{'%02d:00'|format(f.close_hour)}}</td><td>{{'Aktif' if f.is_active else 'Pasif'}}</td><td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('fields.edit_field', field_id=f.id) }}">Düzenle</a></td></tr>{% endfor %}
-</table>
+<div class="page-header page-header-stack mb-3">
+  <div>
+    <h3 class="page-title mb-0">Saha Yönetimi</h3>
+    <p class="page-subtitle">Fiyatları, çalışma saatlerini ve aktif/pasif durumunu hızlıca yönetin.</p>
+  </div>
+  <a class="btn btn-primary btn-lg" href="{{ url_for('fields.create_field') }}">Yeni Saha</a>
+</div>
+
+<div class="d-lg-none admin-card-list">
+  {% for f in fields %}
+  <section class="card admin-item-card">
+    <div class="card-body">
+      <div class="admin-item-head">
+        <div>
+          <h4 class="admin-item-title">{{ f.name }}</h4>
+          <span class="admin-status-pill {% if f.is_active %}is-active{% else %}is-passive{% endif %}">{{ 'Aktif' if f.is_active else 'Pasif' }}</span>
+        </div>
+        <a class="btn btn-outline-secondary" href="{{ url_for('fields.edit_field', field_id=f.id) }}">Düzenle</a>
+      </div>
+
+      <div class="admin-price-grid">
+        <div class="admin-price-card">
+          <small>Tek Saatlik</small>
+          <strong>₺{{ f.rental_price }}</strong>
+        </div>
+        <div class="admin-price-card is-subscriber">
+          <small>Abone</small>
+          <strong>₺{{ f.subscription_price }}</strong>
+        </div>
+      </div>
+
+      <div class="admin-meta-list">
+        <div class="admin-meta-row">
+          <span>Saat</span>
+          <strong>{{ '%02d:00'|format(f.open_hour) }} - {{ '%02d:00'|format(f.close_hour) }}</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endfor %}
+</div>
+
+<div class="card d-none d-lg-block">
+  <div class="card-body p-0 p-md-3">
+    <table class="table table-striped mobile-stack-table mb-0">
+      <thead><tr><th>Ad</th><th>Tek Saatlik</th><th>Abone</th><th>Saat</th><th>Durum</th><th></th></tr></thead>
+      <tbody>
+      {% for f in fields %}<tr><td data-label="Ad">{{f.name}}</td><td data-label="Tek Saatlik">₺{{f.rental_price}}</td><td data-label="Abone">₺{{f.subscription_price}}</td><td data-label="Saat">{{'%02d:00'|format(f.open_hour)}}-{{'%02d:00'|format(f.close_hour)}}</td><td data-label="Durum">{{'Aktif' if f.is_active else 'Pasif'}}</td><td data-label="İşlem"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('fields.edit_field', field_id=f.id) }}">Düzenle</a></td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

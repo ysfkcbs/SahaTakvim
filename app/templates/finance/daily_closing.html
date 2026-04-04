@@ -1,16 +1,137 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Gün Sonu Kapanışı</h3>
-<p class="text-muted">Tutar alanlarına <strong>4430</strong>, <strong>1.250,50</strong> veya <strong>1250.50</strong> formatında giriş yapabilirsiniz.</p>
-<div class="row g-4">
-<div class="col-md-4"><div class="card"><div class="card-body"><form method="post">{{ form.hidden_tag() }}
-<div class="mb-2">{{ form.closing_date.label }}{{ form.closing_date(class='form-control') }}</div>
-<div class="mb-2">{{ form.card_total.label }}{{ form.card_total(class='form-control') }}</div>
-<div class="mb-2">{{ form.cash_total.label }}{{ form.cash_total(class='form-control') }}</div>
-<div class="mb-2">{{ form.iban_total.label }}{{ form.iban_total(class='form-control') }}</div>
-<div class="mb-2">{{ form.notes.label }}{{ form.notes(class='form-control') }}</div>
-{{ form.submit(class='btn btn-success') }}</form></div></div></div>
-<div class="col-md-8"><table class="table table-sm"><tr><th>Tarih</th><th>Kart</th><th>Nakit</th><th>IBAN</th><th>Giren</th></tr>
-{% for c in closings %}<tr><td>{{c.closing_date}}</td><td>{{c.card_total}}</td><td>{{c.cash_total}}</td><td>{{c.iban_total}}</td><td>{{c.entered_by.username}}</td></tr>{% else %}<tr><td colspan="5">Kayıt yok.</td></tr>{% endfor %}
-</table></div></div>
+<div class="page-header page-header-stack mb-3">
+  <div>
+    <h3 class="page-title">Gün Sonu Kapanışı</h3>
+    <p class="page-subtitle">Kart, nakit ve IBAN tutarlarını hızlıca girip kapanışı kaydedin.</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl-4">
+    <div class="card stat-card daily-summary-card">
+      <div class="card-body">
+        <small>Bu Ay Kart</small>
+        <h4>₺{{ '%.0f'|format(month_card_total|float) }}</h4>
+        <span class="daily-summary-period">{{ current_month_label }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-xl-4">
+    <div class="card stat-card daily-summary-card">
+      <div class="card-body">
+        <small>Bu Ay Nakit</small>
+        <h4>₺{{ '%.0f'|format(month_cash_total|float) }}</h4>
+        <span class="daily-summary-period">{{ current_month_label }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-xl-4">
+    <div class="card stat-card daily-summary-card">
+      <div class="card-body">
+        <small>Bu Ay IBAN</small>
+        <h4>₺{{ '%.0f'|format(month_iban_total|float) }}</h4>
+        <span class="daily-summary-period">{{ current_month_label }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="daily-closing-layout row g-4">
+  <div class="col-lg-5">
+    <form method="post" class="card daily-closing-form-card">
+      <div class="card-body p-4 p-md-4">
+        {{ form.hidden_tag() }}
+
+        <div class="daily-closing-topbar">
+          <div>
+            <span class="daily-closing-kicker">Bugünün Kasa Özeti</span>
+            <h4 class="daily-closing-total-title">Toplam</h4>
+          </div>
+          <div class="daily-closing-total-box">
+            <small>Genel Toplam</small>
+            <strong id="daily_closing_total">0,00</strong>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ form.closing_date.label(class='form-label auth-label') }}
+          {{ form.closing_date(class='form-control form-control-lg', id='closing_date_input') }}
+        </div>
+
+        <div class="daily-closing-inputs">
+          <div class="daily-amount-card">
+            <label class="form-label daily-amount-label" for="card_total_input">Kart</label>
+            <div class="daily-amount-field">
+              <span class="daily-amount-currency">₺</span>
+              {{ form.card_total(class='form-control form-control-lg daily-amount-input', id='card_total_input', inputmode='decimal', placeholder='0', autocomplete='off') }}
+            </div>
+          </div>
+
+          <div class="daily-amount-card">
+            <label class="form-label daily-amount-label" for="cash_total_input">Nakit</label>
+            <div class="daily-amount-field">
+              <span class="daily-amount-currency">₺</span>
+              {{ form.cash_total(class='form-control form-control-lg daily-amount-input', id='cash_total_input', inputmode='decimal', placeholder='0', autocomplete='off') }}
+            </div>
+          </div>
+
+          <div class="daily-amount-card">
+            <label class="form-label daily-amount-label" for="iban_total_input">IBAN</label>
+            <div class="daily-amount-field">
+              <span class="daily-amount-currency">₺</span>
+              {{ form.iban_total(class='form-control form-control-lg daily-amount-input', id='iban_total_input', inputmode='decimal', placeholder='0', autocomplete='off') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          {{ form.notes.label(class='form-label') }}
+          {{ form.notes(class='form-control daily-notes-input', rows='3', placeholder='İsteğe bağlı not ekleyin') }}
+        </div>
+
+        <div class="daily-closing-help mt-3">
+          Tutar alanlarına <strong>4430</strong>, <strong>1.250,50</strong> veya <strong>1250.50</strong> formatında giriş yapabilirsiniz.
+        </div>
+
+        <div class="daily-closing-actions d-none d-lg-flex">
+          {{ form.submit(class='btn btn-success btn-lg w-100 daily-submit-btn') }}
+        </div>
+      </div>
+
+      <div class="daily-closing-sticky-action d-lg-none">
+        <div class="daily-closing-sticky-total">
+          <small>Toplam</small>
+          <strong id="daily_closing_total_sticky">0,00</strong>
+        </div>
+        {{ form.submit(class='btn btn-success btn-lg daily-submit-btn') }}
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">Son Kapanış Kayıtları</div>
+      <div class="card-body p-0 p-md-3">
+        <table class="table table-sm mobile-stack-table mb-0">
+          <thead><tr><th>Tarih</th><th>Kart</th><th>Nakit</th><th>IBAN</th><th>Günlük Toplam</th><th>Giren</th></tr></thead>
+          <tbody>
+          {% for c in closings %}
+          <tr>
+            <td data-label="Tarih">{{c.closing_date}}</td>
+            <td data-label="Kart">{{c.card_total}}</td>
+            <td data-label="Nakit">{{c.cash_total}}</td>
+            <td data-label="IBAN">{{c.iban_total}}</td>
+            <td data-label="Günlük Toplam"><strong class="daily-row-total">₺{{ '%.2f'|format(((c.card_total or 0) + (c.cash_total or 0) + (c.iban_total or 0))|float) }}</strong></td>
+            <td data-label="Giren">{{c.entered_by.username}}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6">Kayıt yok.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

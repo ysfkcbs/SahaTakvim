@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 
-from flask import Blueprint, render_template
+from flask import Blueprint, current_app, render_template, send_from_directory
 from flask_login import current_user, login_required
 from sqlalchemy import case, extract, func
 
@@ -8,6 +8,18 @@ from app.models import DailyClosing, Expense, Field, Income, Reservation
 
 
 main_bp = Blueprint("main", __name__)
+
+
+@main_bp.route("/manifest.webmanifest")
+def web_manifest():
+    return send_from_directory(current_app.static_folder, "manifest.webmanifest", mimetype="application/manifest+json")
+
+
+@main_bp.route("/service-worker.js")
+def service_worker():
+    response = send_from_directory(current_app.static_folder, "service-worker.js", mimetype="application/javascript")
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 @main_bp.route("/")

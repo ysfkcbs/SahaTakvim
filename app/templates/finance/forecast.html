@@ -1,9 +1,81 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>Finansal Öngörü</h3>
-<div class="row g-3 mb-3"><div class="col-md-4"><div class="card stat-card"><div class="card-body"><small>Bu Ay Gelir</small><h4>₺{{ '%.0f'|format(month_income|float) }}</h4></div></div></div>
-<div class="col-md-4"><div class="card stat-card"><div class="card-body"><small>Bu Ay Gider</small><h4>₺{{ '%.0f'|format(month_expense|float) }}</h4></div></div></div></div>
-<table class="table"><tr><th>Ay</th><th>Tahmini Gelir</th><th>Tahmini Gider</th><th>Net</th></tr>
-{% for p in projection %}<tr><td>{{p.month}}</td><td>₺{{'%.0f'|format(p.income|float)}}</td><td>₺{{'%.0f'|format(p.expense|float)}}</td><td>₺{{'%.0f'|format(p.net|float)}}</td></tr>{% endfor %}
-</table>
+<div class="page-header page-header-stack mb-3">
+  <div>
+    <h3 class="page-title mb-0">Bilanço</h3>
+    <p class="page-subtitle">Gelir ve gider kayıtlarını tek ekrandan yönetin, tahmini bilanço kırılımını takip edin.</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-4"><div class="card stat-card"><div class="card-body"><small>Bu Ay Gelir</small><h4>₺{{ '%.0f'|format(month_income|float) }}</h4></div></div></div>
+  <div class="col-6 col-md-4"><div class="card stat-card"><div class="card-body"><small>Bu Ay Gider</small><h4>₺{{ '%.0f'|format(month_expense|float) }}</h4></div></div></div>
+  <div class="col-12 col-md-4"><div class="card stat-card"><div class="card-body"><small>Bu Ay Net Kazanç</small><h4>₺{{ '%.0f'|format((month_income|float) - (month_expense|float)) }}</h4></div></div></div>
+</div>
+
+<div class="card card-body mb-3">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% if editing_record %}
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h4 class="page-title mb-0">{{ form_mode_title }}</h4>
+        <p class="page-subtitle">Kaydı güncelleyebilir veya yeni kayıt eklemeye dönebilirsiniz.</p>
+      </div>
+      <a class="btn btn-outline-secondary" href="{{ cancel_url }}">İptal</a>
+    </div>
+    {% endif %}
+    <div class="row g-2">
+      <div class="col-md-3">{{ form.transaction_kind.label(class='form-label') }}{{ form.transaction_kind(class='form-select form-select-lg') }}</div>
+      <div class="col-md-3">{{ form.title.label(class='form-label') }}{{ form.title(class='form-control form-control-lg') }}</div>
+      <div class="col-md-2">{{ form.amount.label(class='form-label') }}{{ form.amount(class='form-control form-control-lg') }}</div>
+      <div class="col-md-2">{{ form.date.label(class='form-label') }}{{ form.date(class='form-control form-control-lg') }}</div>
+      <div class="col-md-2">{{ form.recurrence.label(class='form-label') }}{{ form.recurrence(class='form-select form-select-lg') }}</div>
+      <div class="col-12">{{ form.description.label(class='form-label') }}{{ form.description(class='form-control', rows='3') }}</div>
+      <div class="col-md-6 form-check">{{ form.is_recurring(class='form-check-input') }} {{ form.is_recurring.label(class='form-check-label') }}</div>
+      <div class="col-md-6 form-check">{{ form.is_paid(class='form-check-input') }} {{ form.is_paid.label(class='form-check-label') }}</div>
+    </div>
+    {{ form.submit(class='btn btn-primary btn-lg w-100 mt-3', value=submit_label) }}
+  </form>
+</div>
+
+<div class="card mt-3">
+  <div class="card-body p-0 p-md-3">
+    <table class="table table-striped mobile-stack-table finance-record-table mb-0">
+      <thead><tr><th>Tarih</th><th>Başlık</th><th>Açıklama</th><th>İşlem Türü</th><th>Tutar</th><th>Tip</th><th>Ödeme Durumu</th><th>İşlem</th></tr></thead>
+      <tbody>
+      {% for r in records %}
+      <tr>
+        <td data-label="Tarih">{{ r.date }}</td>
+        <td data-label="Başlık"><div class="finance-record-main"><strong>{{ r.title }}</strong></div></td>
+        <td data-label="Açıklama"><span class="finance-description-cell">{{ r.description if r.description else '-' }}</span></td>
+        <td data-label="İşlem Türü"><span class="finance-kind-pill {{ 'is-income' if r.kind == 'income' else 'is-expense' }}">{{ r.kind_label }}</span></td>
+        <td data-label="Tutar"><strong class="finance-amount">₺{{ r.amount }}</strong></td>
+        <td data-label="Tip"><strong>{{ 'Sabit' if r.is_recurring else 'Geçici' }}</strong></td>
+        <td data-label="Ödeme Durumu">{% if r.is_recurring %}<span class="finance-paid-indicator {% if r.is_paid %}is-paid{% else %}is-unpaid{% endif %}">{{ '✓ Ödendi' if r.is_paid else 'Bekliyor' }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td>
+        <td data-label="İşlem" class="action-cell"><div class="action-group finance-inline-actions"><a class="btn btn-sm btn-outline-primary" href="{{ r.edit_url }}">Düzenle</a><form method="post" action="{{ r.delete_url }}" onsubmit="return confirm('Kaydı silmek istediğinize emin misiniz?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="btn btn-sm btn-outline-danger">Sil</button></form></div></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-body p-0 p-md-3">
+    <table class="table mobile-stack-table finance-balance-table mb-0">
+      <thead><tr><th>Ay</th><th>Tahmini Gelir</th><th>Tahmini Gider</th><th>Net</th></tr></thead>
+      <tbody>
+      {% for p in projection %}
+      <tr>
+        <td data-label="Ay">{{p.month}}</td>
+        <td data-label="Tahmini Gelir"><div class="finance-balance-cell"><strong>₺{{'%.0f'|format(p.income|float)}}</strong><div class="finance-balance-breakdown"><div class="finance-breakdown-card is-paid"><small>Ödendi</small><strong>₺{{'%.0f'|format(p.paid_income|float)}}</strong></div><div class="finance-breakdown-card is-unpaid"><small>Bekleyen</small><strong>₺{{'%.0f'|format(p.pending_income|float)}}</strong></div></div></div></td>
+        <td data-label="Tahmini Gider"><div class="finance-balance-cell"><strong>₺{{'%.0f'|format(p.expense|float)}}</strong><div class="finance-balance-breakdown"><div class="finance-breakdown-card is-paid"><small>Ödendi</small><strong>₺{{'%.0f'|format(p.paid_expense|float)}}</strong></div><div class="finance-breakdown-card is-unpaid"><small>Bekleyen</small><strong>₺{{'%.0f'|format(p.pending_expense|float)}}</strong></div></div></div></td>
+        <td data-label="Net"><strong class="finance-amount">₺{{'%.0f'|format(p.net|float)}}</strong></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}

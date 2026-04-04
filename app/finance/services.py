@@ -22,14 +22,16 @@ def reservation_income_for_month(year: int, month: int):
     return total
 
 
-def recurring_total(model, year, month):
+def recurring_total(model, year, month, paid_only=None):
     items = model.query.filter_by(is_recurring=True).all()
     total = 0.0
     for item in items:
-        if item.recurrence == "monthly":
-            total += float(item.amount)
-        elif item.recurrence == "yearly" and item.date.month == month:
-            total += float(item.amount)
+      if paid_only is not None and item.is_paid != paid_only:
+          continue
+      if item.recurrence == "monthly":
+          total += float(item.amount)
+      elif item.recurrence == "yearly" and item.date.month == month:
+          total += float(item.amount)
     return total
 
 
@@ -47,8 +49,23 @@ def forecast_next_months(month_count=3):
     for offset in range(month_count):
         m = ((today.month - 1 + offset) % 12) + 1
         y = today.year + ((today.month - 1 + offset) // 12)
-        income = reservation_income_for_month(y, m) + recurring_total(Income, y, m)
-        expense = recurring_total(Expense, y, m)
+        paid_income = recurring_total(Income, y, m, paid_only=True)
+        pending_income = recurring_total(Income, y, m, paid_only=False)
+        paid_expense = recurring_total(Expense, y, m, paid_only=True)
+        pending_expense = recurring_total(Expense, y, m, paid_only=False)
+        income = reservation_income_for_month(y, m) + paid_income + pending_income
+        expense = paid_expense + pending_expense
         label = f"{y}-{m:02d}"
-        data.append({"month": label, "income": income, "expense": expense, "net": income - expense})
+        data.append(
+            {
+                "month": label,
+                "income": income,
+                "expense": expense,
+                "net": income - expense,
+                "paid_income": paid_income,
+                "pending_income": pending_income,
+                "paid_expense": paid_expense,
+                "pending_expense": pending_expense,
+            }
+        )
     return data

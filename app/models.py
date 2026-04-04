@@ -99,6 +99,7 @@ class Income(TimestampMixin, db.Model):
     date = db.Column(db.Date, nullable=False)
     description = db.Column(db.Text)
     is_recurring = db.Column(db.Boolean, default=False, nullable=False)
+    is_paid = db.Column(db.Boolean, default=False, nullable=False)
     recurrence = db.Column(db.String(20), default="monthly", nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("income_category.id"), nullable=True)
 
@@ -112,6 +113,7 @@ class Expense(TimestampMixin, db.Model):
     date = db.Column(db.Date, nullable=False)
     description = db.Column(db.Text)
     is_recurring = db.Column(db.Boolean, default=False, nullable=False)
+    is_paid = db.Column(db.Boolean, default=False, nullable=False)
     recurrence = db.Column(db.String(20), default="monthly", nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("expense_category.id"), nullable=True)
 

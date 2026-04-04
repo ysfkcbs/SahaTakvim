@@ -1,15 +1,72 @@
 {% extends 'base.html' %}
 {% block content %}
-<h3>{{ title }}</h3>
-<form method="post" class="card card-body">{{ form.hidden_tag() }}
-<div class="row g-3">
-<div class="col-md-6">{{ form.name.label }}{{ form.name(class='form-control') }}</div>
-<div class="col-md-3">{{ form.rental_price.label }}{{ form.rental_price(class='form-control') }}</div>
-<div class="col-md-3">{{ form.subscription_price.label }}{{ form.subscription_price(class='form-control') }}</div>
-<div class="col-md-3">{{ form.open_hour.label }}{{ form.open_hour(class='form-control') }}</div>
-<div class="col-md-3">{{ form.close_hour.label }}{{ form.close_hour(class='form-control') }}</div>
-<div class="col-md-3 form-check mt-4">{{ form.is_active(class='form-check-input') }} {{ form.is_active.label(class='form-check-label') }}</div>
+<div class="page-header mb-3">
+  <div>
+    <h3 class="page-title mb-0">{{ title }}</h3>
+    <p class="page-subtitle">Fiyat ve çalışma saatlerini mobilde rahat düzenleyebileceğiniz sade yönetim formu.</p>
+  </div>
 </div>
-<div class="mt-3">{{ form.submit(class='btn btn-primary') }}</div>
+
+<form method="post" class="card admin-settings-card">
+  <div class="card-body p-4">
+    {{ form.hidden_tag() }}
+
+    <div class="mb-4">
+      {{ form.name.label(class='form-label auth-label') }}
+      {{ form.name(class='form-control form-control-lg', placeholder='Saha adı') }}
+    </div>
+
+    <div class="admin-price-grid admin-form-price-grid">
+      <section class="admin-price-editor">
+        <div class="admin-price-editor-head">
+          <small>Tek Saatlik Fiyat</small>
+          <strong>Standart maç</strong>
+        </div>
+        {{ form.rental_price.label(class='form-label') }}
+        <div class="admin-money-input">
+          <span>₺</span>
+          {{ form.rental_price(class='form-control form-control-lg admin-money-field', inputmode='decimal', placeholder='0') }}
+        </div>
+      </section>
+
+      <section class="admin-price-editor is-subscriber">
+        <div class="admin-price-editor-head">
+          <small>Abone Fiyatı</small>
+          <strong>Üyelik / sabit müşteri</strong>
+        </div>
+        {{ form.subscription_price.label(class='form-label') }}
+        <div class="admin-money-input">
+          <span>₺</span>
+          {{ form.subscription_price(class='form-control form-control-lg admin-money-field', inputmode='decimal', placeholder='0') }}
+        </div>
+      </section>
+    </div>
+
+    <div class="admin-hours-grid">
+      <section class="admin-simple-card">
+        {{ form.open_hour.label(class='form-label auth-label') }}
+        {{ form.open_hour(class='form-control form-control-lg', inputmode='numeric', placeholder='17') }}
+      </section>
+      <section class="admin-simple-card">
+        {{ form.close_hour.label(class='form-label auth-label') }}
+        {{ form.close_hour(class='form-control form-control-lg', inputmode='numeric', placeholder='2') }}
+      </section>
+    </div>
+
+    <div class="admin-toggle-card">
+      <div>
+        <strong>Saha Durumu</strong>
+        <p class="mb-0 text-muted">Sahayı rezervasyonlara açık veya pasif yapın.</p>
+      </div>
+      <label class="form-check admin-inline-toggle">
+        {{ form.is_active(class='form-check-input') }}
+        <span class="form-check-label">{{ form.is_active.label.text }}</span>
+      </label>
+    </div>
+
+    <div class="admin-form-actions">
+      {{ form.submit(class='btn btn-primary btn-lg w-100') }}
+    </div>
+  </div>
 </form>
 {% endblock %}

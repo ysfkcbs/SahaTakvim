@@ -1,11 +1,21 @@
 <div class="card card-body"><form method="post">{{ form.hidden_tag() }}
-<div class="row g-2">
-<div class="col-md-3">{{ form.title.label }}{{ form.title(class='form-control') }}</div>
-<div class="col-md-2">{{ form.category.label }}{{ form.category(class='form-control') }}</div>
-<div class="col-md-2">{{ form.amount.label }}{{ form.amount(class='form-control') }}</div>
-<div class="col-md-2">{{ form.date.label }}{{ form.date(class='form-control') }}</div>
-<div class="col-md-3">{{ form.recurrence.label }}{{ form.recurrence(class='form-select') }}</div>
-<div class="col-12">{{ form.description.label }}{{ form.description(class='form-control') }}</div>
-<div class="col-12 form-check">{{ form.is_recurring(class='form-check-input') }} {{ form.is_recurring.label(class='form-check-label') }}</div>
+{% if editing_record %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <div>
+    <h4 class="page-title mb-0">{{ form_mode_title }}</h4>
+    <p class="page-subtitle">Kaydı güncelleyebilir veya listeden yeni kayıt eklemeye dönebilirsiniz.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ cancel_url }}">İptal</a>
 </div>
-{{ form.submit(class='btn btn-primary mt-3') }}</form></div>
+{% endif %}
+<div class="row g-2">
+<div class="col-md-3">{{ form.title.label(class='form-label') }}{{ form.title(class='form-control form-control-lg') }}</div>
+<div class="col-md-2">{{ form.category.label(class='form-label') }}{{ form.category(class='form-control form-control-lg') }}</div>
+<div class="col-md-2">{{ form.amount.label(class='form-label') }}{{ form.amount(class='form-control form-control-lg') }}</div>
+<div class="col-md-2">{{ form.date.label(class='form-label') }}{{ form.date(class='form-control form-control-lg') }}</div>
+<div class="col-md-3">{{ form.recurrence.label(class='form-label') }}{{ form.recurrence(class='form-select form-select-lg') }}</div>
+<div class="col-12">{{ form.description.label(class='form-label') }}{{ form.description(class='form-control', rows='3') }}</div>
+<div class="col-md-6 form-check">{{ form.is_recurring(class='form-check-input') }} {{ form.is_recurring.label(class='form-check-label') }}</div>
+<div class="col-md-6 form-check">{{ form.is_paid(class='form-check-input') }} {{ form.is_paid.label(class='form-check-label') }}</div>
+</div>
+{{ form.submit(class='btn btn-primary btn-lg w-100 mt-3', value=submit_label if submit_label is defined else form.submit.label.text) }}</form></div>

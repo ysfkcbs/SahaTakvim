@@ -1,12 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Çalışan Paneli</h2>
-<div class="d-flex gap-2 mb-3">
-  <a class="btn btn-primary" href="{{ url_for('calendar.weekly') }}">Haftalık Takvim</a>
-  <a class="btn btn-outline-primary" href="{{ url_for('finance.daily_closing') }}">Gün Sonu Kapanışı</a>
+<h2 class="page-title">Çalışan Paneli</h2>
+<div class="d-grid d-md-flex gap-2 mb-3">
+  <a class="btn btn-primary btn-lg" href="{{ url_for('calendar.weekly') }}">Haftalık Takvim</a>
+  <a class="btn btn-outline-primary btn-lg" href="{{ url_for('finance.daily_closing') }}">Gün Sonu Kapanışı</a>
 </div>
 <div class="card"><div class="card-header">Bugünkü Rezervasyonlar ({{ today }})</div><div class="card-body">
-<table class="table"><tr><th>Saat</th><th>Kişi</th><th>Tür</th><th>Kapora</th></tr>
-{% for r in todays %}<tr><td>{{'%02d:00'|format(r.reservation_hour)}}</td><td>{{r.customer_name}}</td><td>{{r.reservation_type}}</td><td>{{'Alındı' if r.deposit_paid else 'Bekliyor'}}</td></tr>{% else %}<tr><td colspan="4">Rezervasyon bulunamadı.</td></tr>{% endfor %}
+<table class="table mobile-stack-table">
+  <thead><tr><th>Saat</th><th>Kişi</th><th>Tür</th><th>Kapora</th></tr></thead>
+  <tbody>
+  {% for r in todays %}<tr><td data-label="Saat">{{'%02d:00'|format(r.reservation_hour)}}</td><td data-label="Kişi">{{r.customer_name}}</td><td data-label="Tür">{{r.reservation_type}}</td><td data-label="Kapora">{{'Alındı' if r.deposit_paid else 'Bekliyor'}}</td></tr>{% else %}<tr><td colspan="4">Rezervasyon bulunamadı.</td></tr>{% endfor %}
+  </tbody>
 </table></div></div>
 {% endblock %}

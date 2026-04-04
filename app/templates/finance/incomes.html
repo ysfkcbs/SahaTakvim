@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <h3>Gelir Yönetimi</h3>
+{% if editing_record %}
+<p class="page-subtitle mb-3">Gelir kaydını düzenliyorsunuz.</p>
+{% endif %}
 {% include 'finance/_record_form.html' %}
-<table class="table table-striped mt-3"><tr><th>Tarih</th><th>Başlık</th><th>Kategori</th><th>Tutar</th><th>Tip</th></tr>{% for i in records %}<tr><td>{{i.date}}</td><td>{{i.title}}</td><td>{{i.category.name if i.category else '-'}}</td><td>₺{{i.amount}}</td><td>{{'Sabit' if i.is_recurring else 'Geçici'}}</td></tr>{% endfor %}</table>
+<div class="card mt-3"><div class="card-body p-0 p-md-3"><table class="table table-striped mobile-stack-table finance-record-table mb-0"><thead><tr><th>Tarih</th><th>Kayıt</th><th>Tutar</th><th>Tip</th><th>Ödeme Durumu</th><th>İşlem</th></tr></thead><tbody>{% for i in records %}<tr><td data-label="Tarih">{{i.date}}</td><td data-label="Kayıt"><div class="finance-record-main"><strong>{{i.title}}</strong><small>{{i.category.name if i.category else '-'}}</small></div></td><td data-label="Tutar"><strong class="finance-amount">₺{{i.amount}}</strong></td><td data-label="Tip"><strong>{{'Sabit' if i.is_recurring else 'Geçici'}}</strong></td><td data-label="Ödeme Durumu">{% if i.is_recurring %}<span class="finance-paid-indicator {% if i.is_paid %}is-paid{% else %}is-unpaid{% endif %}">{{ '✓ Ödendi' if i.is_paid else 'Bekliyor' }}</span>{% else %}<span class="text-muted">-</span>{% endif %}</td><td data-label="İşlem" class="action-cell"><div class="action-group finance-inline-actions"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('finance.edit_income', record_id=i.id) }}">Düzenle</a><form method="post" action="{{ url_for('finance.delete_income', record_id=i.id) }}" onsubmit="return confirm('Gelir kaydını silmek istediğinize emin misiniz?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /><button class="btn btn-sm btn-outline-danger">Sil</button></form></div></td></tr>{% endfor %}</tbody></table></div></div>
 {% endblock %}

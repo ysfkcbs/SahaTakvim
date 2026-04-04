@@ -1,38 +1,79 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="mb-0">Kullanıcı Yönetimi</h3>
+<div class="page-header page-header-stack mb-3">
+  <div>
+    <h3 class="page-title mb-0">Kullanıcı Yönetimi</h3>
+    <p class="page-subtitle">Yeni kullanıcı ekleyin, rol güncelleyin ve erişimi hızlıca yönetin.</p>
+  </div>
 </div>
 <div class="row g-4">
   <div class="col-lg-4">
-    <div class="card"><div class="card-body">
+    <div class="card admin-settings-card"><div class="card-body p-4">
       <h5 class="mb-3">Yeni Kullanıcı</h5>
       <form method="post">{{ form.hidden_tag() }}
-        <div class="mb-2">{{ form.username.label(class='form-label') }}{{ form.username(class='form-control') }}</div>
-        <div class="mb-2">{{ form.password.label(class='form-label') }}{{ form.password(class='form-control', placeholder='Boş bırakılırsa varsayılan') }}</div>
-        <div class="mb-2">{{ form.role.label(class='form-label') }}{{ form.role(class='form-select') }}</div>
-        <div class="form-check mb-3">{{ form.is_active_user(class='form-check-input') }} {{ form.is_active_user.label(class='form-check-label') }}</div>
-        {{ form.submit(class='btn btn-success w-100') }}
+        <div class="mb-3">{{ form.username.label(class='form-label auth-label') }}{{ form.username(class='form-control form-control-lg') }}</div>
+        <div class="mb-3">{{ form.password.label(class='form-label auth-label') }}{{ form.password(class='form-control form-control-lg', placeholder='Boş bırakılırsa varsayılan') }}</div>
+        <div class="mb-3">{{ form.role.label(class='form-label auth-label') }}{{ form.role(class='form-select form-select-lg') }}</div>
+        <div class="admin-toggle-card mb-3">
+          <div>
+            <strong>Durum</strong>
+            <p class="mb-0 text-muted">Kullanıcı hesabını aktif başlat.</p>
+          </div>
+          <label class="form-check admin-inline-toggle">
+            {{ form.is_active_user(class='form-check-input') }}
+            <span class="form-check-label">{{ form.is_active_user.label.text }}</span>
+          </label>
+        </div>
+        {{ form.submit(class='btn btn-success btn-lg w-100') }}
       </form>
     </div></div>
   </div>
   <div class="col-lg-8">
-    <div class="card"><div class="card-body">
+    <div class="d-lg-none admin-card-list">
+      {% for u in users %}
+      <section class="card admin-item-card">
+        <div class="card-body">
+          <div class="admin-item-head">
+            <div>
+              <h4 class="admin-item-title">{{ u.username }}</h4>
+              <div class="admin-chip-row">
+                <span class="admin-status-pill is-role">{{ u.role }}</span>
+                <span class="admin-status-pill {% if u.is_active_user %}is-active{% else %}is-passive{% endif %}">{{ 'Aktif' if u.is_active_user else 'Pasif' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="action-group mt-3">
+            <a class="btn btn-outline-primary" href="{{ url_for('auth.edit_user', user_id=u.id) }}">Düzenle</a>
+            <form method="post" action="{{ url_for('auth.toggle_user_status', user_id=u.id) }}" onsubmit="return confirm('Kullanıcı durumunu değiştirmek istiyor musunuz?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-outline-{{ 'warning' if u.is_active_user else 'success' }}">{{ 'Pasife Al' if u.is_active_user else 'Aktifleştir' }}</button>
+            </form>
+          </div>
+        </div>
+      </section>
+      {% else %}
+      <div class="card"><div class="card-body text-muted">Henüz kullanıcı yok.</div></div>
+      {% endfor %}
+    </div>
+
+    <div class="card d-none d-lg-block"><div class="card-body">
       <div class="table-responsive">
-        <table class="table table-striped align-middle">
+        <table class="table table-striped align-middle mobile-stack-table">
           <thead><tr><th>Kullanıcı</th><th>Rol</th><th>Durum</th><th>İşlem</th></tr></thead>
           <tbody>
           {% for u in users %}
             <tr>
-              <td>{{u.username}}</td>
-              <td><span class="badge bg-{{ 'dark' if u.role=='admin' else 'secondary' }}">{{u.role}}</span></td>
-              <td><span class="badge bg-{{ 'success' if u.is_active_user else 'danger' }}">{{'Aktif' if u.is_active_user else 'Pasif'}}</span></td>
-              <td class="d-flex gap-2">
+              <td data-label="Kullanıcı">{{u.username}}</td>
+              <td data-label="Rol"><span class="badge bg-{{ 'dark' if u.role=='admin' else 'secondary' }}">{{u.role}}</span></td>
+              <td data-label="Durum"><span class="badge bg-{{ 'success' if u.is_active_user else 'danger' }}">{{'Aktif' if u.is_active_user else 'Pasif'}}</span></td>
+              <td data-label="İşlem" class="action-cell">
+                <div class="action-group">
                 <a class="btn btn-sm btn-outline-primary" href="{{ url_for('auth.edit_user', user_id=u.id) }}">Düzenle</a>
                 <form method="post" action="{{ url_for('auth.toggle_user_status', user_id=u.id) }}" onsubmit="return confirm('Kullanıcı durumunu değiştirmek istiyor musunuz?');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                   <button class="btn btn-sm btn-outline-{{ 'warning' if u.is_active_user else 'success' }}">{{ 'Pasife Al' if u.is_active_user else 'Aktifleştir' }}</button>
                 </form>
+                </div>
               </td>
             </tr>
           {% else %}
