@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, make_response, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 
@@ -18,6 +18,13 @@ def _is_last_active_admin(user: User) -> bool:
     return User.query.filter_by(role="admin", is_active_user=True).count() <= 1
 
 
+def _no_store_response(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -27,20 +34,39 @@ def login():
     if form.validate_on_submit():
         username = form.username.data.strip()
         user = User.query.filter(func.lower(User.username) == username.lower()).first()
-        if user and user.check_password(form.password.data) and user.is_active_user:
+        password_ok = bool(user and user.check_password(form.password.data))
+        is_active = bool(user and user.is_active_user)
+        next_url = request.args.get("next") or url_for("main.index")
+
+        current_app.logger.info(
+            "LOGIN_ATTEMPT username=%s found=%s password_ok=%s active=%s ua=%s",
+            username,
+            bool(user),
+            password_ok,
+            is_active,
+            request.headers.get("User-Agent", "-"),
+        )
+
+        if user and password_ok and is_active:
             login_user(user, remember=True)
             flash("Hoş geldiniz!", "success")
-            return redirect(request.args.get("next") or url_for("main.index"))
+            current_app.logger.info("LOGIN_SUCCESS username=%s redirect=%s", username, next_url)
+            return _no_store_response(make_response(redirect(next_url)))
+
         flash("Geçersiz giriş bilgileri.", "danger")
-    return render_template("auth/login.html", form=form)
+        current_app.logger.warning("LOGIN_REJECTED username=%s", username)
+
+    return _no_store_response(make_response(render_template("auth/login.html", form=form)))
 
 
 @auth_bp.route("/logout")
 @login_required
 def logout():
+    username = current_user.username
     logout_user()
     flash("Oturum kapatıldı.", "info")
-    return redirect(url_for("auth.login"))
+    current_app.logger.info("LOGOUT username=%s", username)
+    return _no_store_response(make_response(redirect(url_for("auth.login"))))
 
 
 @auth_bp.route("/users", methods=["GET", "POST"])
