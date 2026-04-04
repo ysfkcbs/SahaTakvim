@@ -96,5 +96,21 @@ def admin_dashboard():
 @login_required
 def employee_dashboard():
     today = date.today()
-    todays = Reservation.query.filter_by(reservation_date=today).order_by(Reservation.reservation_hour.asc()).all()
-    return render_template("main/employee_dashboard.html", today=today, todays=todays)
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+    weekly_reservations = (
+        Reservation.query.join(Field)
+        .filter(
+            Reservation.reservation_date.between(week_start, week_end),
+            Reservation.status == "active",
+        )
+        .order_by(Reservation.reservation_date.asc(), Reservation.reservation_hour.asc(), Field.name.asc())
+        .all()
+    )
+    return render_template(
+        "main/employee_dashboard.html",
+        today=today,
+        week_start=week_start,
+        week_end=week_end,
+        reservations=weekly_reservations,
+    )
