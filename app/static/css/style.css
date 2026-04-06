@@ -1074,27 +1074,6 @@ body.is-standalone .app-navbar {
   backdrop-filter: blur(8px);
 }
 
-.mobile-weekly-grid-table th:first-child,
-.mobile-weekly-grid-table td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background: rgba(247, 247, 242, 0.98);
-}
-
-.mobile-weekly-grid-table thead th:first-child {
-  z-index: 3;
-}
-
-.mobile-weekly-corner,
-.mobile-week-hour {
-  width: 4.4rem;
-  min-width: 4.4rem;
-  color: var(--app-text-soft);
-  font-size: 0.76rem;
-  font-weight: 700;
-}
-
 .mobile-weekday-label,
 .mobile-weekday-date {
   display: block;
@@ -1197,16 +1176,6 @@ body.is-standalone .app-navbar {
   text-align: center;
   font-size: 0.82rem;
   color: var(--app-text-soft);
-}
-
-.desktop-week-hour {
-  width: 5.25rem;
-  min-width: 5.25rem;
-  padding-right: 0.35rem !important;
-  text-align: right;
-  color: var(--app-text-soft);
-  font-size: 0.78rem;
-  font-weight: 700;
 }
 
 .desktop-slot-cell {
@@ -1836,13 +1805,6 @@ body.is-standalone .app-navbar {
 
   .mobile-weekly-grid-table {
     min-width: 37rem;
-  }
-
-  .mobile-weekly-corner,
-  .mobile-week-hour {
-    width: 3.7rem;
-    min-width: 3.7rem;
-    font-size: 0.72rem;
   }
 
   .mobile-week-slot {
