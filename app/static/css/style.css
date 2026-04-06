@@ -1049,14 +1049,16 @@ body.is-standalone .app-navbar {
 }
 
 .mobile-weekly-grid-shell {
-  overflow-x: hidden;
-  padding-bottom: 0.15rem;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.35rem;
 }
 
 .mobile-weekly-grid-table {
-  width: 100%;
-  min-width: 0;
-  table-layout: fixed;
+  width: max-content;
+  min-width: 100%;
+  table-layout: auto;
 }
 
 .mobile-weekly-grid-table th,
@@ -1879,4 +1881,121 @@ body.is-standalone .app-navbar {
     font-size: 0.54rem;
   }
 
+}
+
+/* ===== Mobile weekly table fix ===== */
+
+/* Tabloyu yatay kaydırılabilir yap */
+.mobile-weekly-grid-shell {
+  overflow-x: auto !important;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.35rem;
+}
+
+/* Tabloyu içeriğe göre genişlet; ekrana zorla sıkıştırma */
+.mobile-weekly-grid-table {
+  width: max-content !important;
+  min-width: 100%;
+  table-layout: auto !important;
+  border-collapse: separate;
+  border-spacing: 0.2rem;
+}
+
+/* İlk sütun saatler için sabit kalsın */
+.mobile-weekly-corner,
+.mobile-week-hour,
+.mobile-weekly-grid-table th:first-child,
+.mobile-weekly-grid-table td:first-child {
+  width: 3rem !important;
+  min-width: 3rem !important;
+  max-width: 3rem;
+}
+
+/* Gün sütunları okunabilir genişlikte olsun */
+.mobile-weekly-grid-table th:not(:first-child),
+.mobile-weekly-grid-table td:not(:first-child) {
+  width: 4.4rem;
+  min-width: 4.4rem;
+}
+
+/* Hücreler daha net görünsün */
+.mobile-week-slot {
+  min-height: 3.4rem;
+  padding: 0.22rem 0.12rem;
+  border-radius: 0.7rem;
+}
+
+/* Sticky başlık ve saat sütunu kaydırmada düzgün dursun */
+.mobile-weekly-grid-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: rgba(247, 247, 242, 0.98);
+}
+
+.mobile-weekly-grid-table th:first-child,
+.mobile-weekly-grid-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: rgba(247, 247, 242, 0.98);
+}
+
+/* Dikey mod */
+@media (max-width: 767.98px) and (orientation: portrait) {
+  .mobile-weekly-grid-table th:not(:first-child),
+  .mobile-weekly-grid-table td:not(:first-child) {
+    width: 4.1rem;
+    min-width: 4.1rem;
+  }
+
+  .mobile-week-slot {
+    min-height: 3.1rem;
+  }
+
+  .mobile-week-slot-time {
+    font-size: 0.62rem;
+  }
+
+  .mobile-week-slot-meta {
+    font-size: 0.5rem;
+  }
+
+  .mobile-weekday-label {
+    font-size: 0.62rem;
+  }
+
+  .mobile-weekday-date {
+    font-size: 0.54rem;
+  }
+}
+
+/* Yatay mod: daha fazla alan olduğu için hücreleri büyüt */
+@media (max-width: 991.98px) and (orientation: landscape) {
+  .mobile-weekly-grid-table th:not(:first-child),
+  .mobile-weekly-grid-table td:not(:first-child) {
+    width: 5.4rem;
+    min-width: 5.4rem;
+  }
+
+  .mobile-weekly-corner,
+  .mobile-week-hour,
+  .mobile-weekly-grid-table th:first-child,
+  .mobile-weekly-grid-table td:first-child {
+    width: 3.4rem !important;
+    min-width: 3.4rem !important;
+  }
+
+  .mobile-week-slot {
+    min-height: 3.6rem;
+  }
+
+  .mobile-week-slot-time {
+    font-size: 0.7rem;
+  }
+
+  .mobile-week-slot-meta {
+    font-size: 0.56rem;
+  }
 }
