@@ -55,6 +55,7 @@
       <table class="table align-middle mobile-weekly-grid-table mb-0">
         <thead>
           <tr>
+            <th class="mobile-weekly-corner">Saat</th>
             {% for d in days %}
             <th>
               <span class="mobile-weekday-label">{{ weekday_names_tr[d.weekday()] }}</span>
@@ -66,6 +67,7 @@
         <tbody>
         {% for h in hours %}
           <tr>
+            <th class="mobile-week-hour">{{ hour_label(h) }}</th>
             {% for d in days %}
               {% set r = slot_map.get((d, h)) %}
               <td>
@@ -107,10 +109,11 @@
 
 <div class="table-responsive calendar-wrap d-none d-lg-block">
   <table class="table align-middle calendar-table desktop-weekly-grid-table">
-    <thead><tr>{% for d in days %}<th>{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }}</th>{% endfor %}</tr></thead>
+    <thead><tr><th class="desktop-week-hour-head">Saat</th>{% for d in days %}<th>{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }}</th>{% endfor %}</tr></thead>
     <tbody>
     {% for h in hours %}
       <tr>
+        <th class="desktop-week-hour">{{ hour_label(h) }}</th>
         {% for d in days %}
           {% set r = slot_map.get((d, h)) %}
           <td class="slot-cell desktop-slot-cell" data-bs-toggle="modal" data-bs-target="#reservationModal" data-date="{{ d }}" data-hour="{{ h }}" data-field="{{ selected_field }}">

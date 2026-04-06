@@ -1049,23 +1049,48 @@ body.is-standalone .app-navbar {
 }
 
 .mobile-weekly-grid-shell {
-  overflow-x: hidden;
+  overflow-x: auto;
   padding-bottom: 0.15rem;
 }
 
 .mobile-weekly-grid-table {
   width: 100%;
-  min-width: 0;
+  min-width: 34rem;
   table-layout: fixed;
 }
 
 .mobile-weekly-grid-table th,
 .mobile-weekly-grid-table td {
-  width: calc(100% / 7);
   padding: 0.18rem;
   text-align: center;
   vertical-align: middle;
   border: 0;
+}
+
+.mobile-weekly-grid-table td {
+  width: calc((100% - 3.25rem) / 7);
+}
+
+.mobile-weekly-corner,
+.mobile-week-hour {
+  width: 3.25rem;
+  min-width: 3.25rem;
+  padding: 0.18rem;
+  color: var(--app-text-soft);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.mobile-weekly-grid-table th:first-child,
+.mobile-weekly-grid-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: rgba(247, 247, 242, 0.98);
+}
+
+.mobile-weekly-grid-table thead th:first-child {
+  z-index: 3;
 }
 
 .mobile-weekly-grid-table thead th {
@@ -1178,6 +1203,18 @@ body.is-standalone .app-navbar {
   text-align: center;
   font-size: 0.82rem;
   color: var(--app-text-soft);
+}
+
+.desktop-week-hour-head,
+.desktop-week-hour {
+  width: 4.75rem;
+  min-width: 4.75rem;
+  padding-right: 0.25rem !important;
+  text-align: right !important;
+  color: var(--app-text-soft) !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  background: transparent !important;
 }
 
 .desktop-slot-cell {
@@ -1806,7 +1843,7 @@ body.is-standalone .app-navbar {
   }
 
   .mobile-weekly-grid-table {
-    width: 100%;
+    min-width: 31rem;
   }
 
   .mobile-week-slot {
@@ -1829,6 +1866,13 @@ body.is-standalone .app-navbar {
   }
 
   .mobile-weekday-date {
+    font-size: 0.62rem;
+  }
+
+  .mobile-weekly-corner,
+  .mobile-week-hour {
+    width: 2.7rem;
+    min-width: 2.7rem;
     font-size: 0.62rem;
   }
 }
