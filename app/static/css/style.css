@@ -1049,18 +1049,20 @@ body.is-standalone .app-navbar {
 }
 
 .mobile-weekly-grid-shell {
-  overflow-x: auto;
+  overflow-x: hidden;
   padding-bottom: 0.15rem;
 }
 
 .mobile-weekly-grid-table {
-  min-width: 40rem;
+  width: 100%;
+  min-width: 0;
   table-layout: fixed;
 }
 
 .mobile-weekly-grid-table th,
 .mobile-weekly-grid-table td {
-  padding: 0.28rem;
+  width: calc(100% / 7);
+  padding: 0.18rem;
   text-align: center;
   vertical-align: middle;
   border: 0;
@@ -1095,11 +1097,11 @@ body.is-standalone .app-navbar {
   place-items: center;
   gap: 0.08rem;
   width: 100%;
-  min-width: 4.9rem;
-  min-height: 4.4rem;
-  padding: 0.45rem 0.3rem;
+  min-width: 0;
+  min-height: 3.7rem;
+  padding: 0.35rem 0.18rem;
   border: 1px solid rgba(22, 46, 84, 0.08);
-  border-radius: 0.8rem;
+  border-radius: 0.72rem;
   background: rgba(255, 255, 255, 0.98);
 }
 
@@ -1119,13 +1121,13 @@ body.is-standalone .app-navbar {
 }
 
 .mobile-week-slot-time {
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   font-weight: 800;
   line-height: 1.1;
 }
 
 .mobile-week-slot-meta {
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 700;
   line-height: 1.1;
   color: var(--app-text-soft);
@@ -1804,20 +1806,29 @@ body.is-standalone .app-navbar {
   }
 
   .mobile-weekly-grid-table {
-    min-width: 37rem;
+    width: 100%;
   }
 
   .mobile-week-slot {
-    min-width: 4.35rem;
-    min-height: 3.9rem;
-    border-radius: 0.72rem;
+    min-width: 0;
+    min-height: 3.25rem;
+    padding: 0.28rem 0.12rem;
+    border-radius: 0.62rem;
   }
 
   .mobile-week-slot-time {
-    font-size: 0.82rem;
+    font-size: 0.72rem;
   }
 
   .mobile-week-slot-meta {
+    font-size: 0.58rem;
+  }
+
+  .mobile-weekday-label {
     font-size: 0.68rem;
+  }
+
+  .mobile-weekday-date {
+    font-size: 0.62rem;
   }
 }
