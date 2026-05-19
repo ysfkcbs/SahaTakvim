@@ -89,9 +89,13 @@ Local Docker ortamı için temel değişkenler `.env` dosyasında tanımlıdır.
 FLASK_ENV=production
 SECRET_KEY=change-this-secret
 DATABASE_URL=postgresql://postgres:your-password@host.docker.internal:5432/SahaTakvim
+SESSION_COOKIE_SECURE=false
+REMEMBER_COOKIE_SECURE=false
 DEFAULT_ADMIN_USERNAME=admin
 DEFAULT_ADMIN_PASSWORD=Admin123!
 ```
+
+Telefon veya başka cihazlardan yerel ağda `http://` ile erişirken cookie secure değerleri `false` kalmalıdır. HTTPS arkasına alınan gerçek production ortamında bu değerler `true` yapılabilir.
 
 ## Lokal Python ile Çalıştırma
 

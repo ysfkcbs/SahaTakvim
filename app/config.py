@@ -28,6 +28,13 @@ def build_database_uri():
     return f"sqlite:///{DEFAULT_SQLITE_PATH.as_posix()}"
 
 
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -38,8 +45,9 @@ class Config:
     SESSION_COOKIE_SAMESITE = "Lax"
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SECURE = os.getenv("FLASK_ENV", "development") == "production"
-    REMEMBER_COOKIE_SECURE = os.getenv("FLASK_ENV", "development") == "production"
+    _COOKIE_SECURE_DEFAULT = os.getenv("FLASK_ENV", "development") == "production"
+    SESSION_COOKIE_SECURE = env_bool("SESSION_COOKIE_SECURE", _COOKIE_SECURE_DEFAULT)
+    REMEMBER_COOKIE_SECURE = env_bool("REMEMBER_COOKIE_SECURE", _COOKIE_SECURE_DEFAULT)
 
 
 class DevelopmentConfig(Config):
