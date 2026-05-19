@@ -11,6 +11,52 @@ from app.models import Field, Reservation
 
 calendar_bp = Blueprint("calendar", __name__)
 
+
+def _matching_subscription_query(field_id, reservation_date, reservation_hour, exclude_id=None):
+    query = Reservation.query.filter(
+        Reservation.field_id == field_id,
+        Reservation.reservation_hour == reservation_hour,
+        Reservation.reservation_type == "abone",
+        Reservation.status == "active",
+        Reservation.reservation_date <= reservation_date,
+    )
+    if exclude_id:
+        query = query.filter(Reservation.id != exclude_id)
+    return [reservation for reservation in query.all() if reservation.reservation_date.weekday() == reservation_date.weekday()]
+
+
+def _future_slot_conflicts_for_subscription(field_id, reservation_date, reservation_hour, exclude_id=None):
+    query = Reservation.query.filter(
+        Reservation.field_id == field_id,
+        Reservation.reservation_hour == reservation_hour,
+        Reservation.status == "active",
+        Reservation.reservation_date >= reservation_date,
+    )
+    if exclude_id:
+        query = query.filter(Reservation.id != exclude_id)
+    return [reservation for reservation in query.all() if reservation.reservation_date.weekday() == reservation_date.weekday()]
+
+
+def _has_slot_conflict(field_id, reservation_date, reservation_hour, reservation_type, exclude_id=None):
+    exact_query = Reservation.query.filter_by(
+        field_id=field_id,
+        reservation_date=reservation_date,
+        reservation_hour=reservation_hour,
+        status="active",
+    )
+    if exclude_id:
+        exact_query = exact_query.filter(Reservation.id != exclude_id)
+    if exact_query.first():
+        return True
+
+    if _matching_subscription_query(field_id, reservation_date, reservation_hour, exclude_id):
+        return True
+
+    if reservation_type == "abone":
+        return bool(_future_slot_conflicts_for_subscription(field_id, reservation_date, reservation_hour, exclude_id))
+
+    return False
+
 WEEKDAY_NAMES_TR = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
 
 
@@ -33,8 +79,17 @@ def weekly():
     )
     days = [start + timedelta(days=i) for i in range(7)]
 
-    reservations = (
+    dated_reservations = (
         Reservation.query.filter(Reservation.reservation_date.between(start, end), Reservation.status == "active")
+        .filter(Reservation.field_id == selected_field if selected_field else True)
+        .all()
+    )
+    recurring_subscriptions = (
+        Reservation.query.filter(
+            Reservation.reservation_type == "abone",
+            Reservation.reservation_date <= end,
+            Reservation.status == "active",
+        )
         .filter(Reservation.field_id == selected_field if selected_field else True)
         .all()
     )
@@ -47,11 +102,18 @@ def weekly():
         selected_field_obj.name if selected_field_obj else None,
         start.isoformat(),
         end.isoformat(),
-        len(reservations),
+        len(dated_reservations),
         request.headers.get("User-Agent", "")[:180],
     )
 
-    slot_map = {(r.reservation_date, r.reservation_hour): r for r in reservations}
+    slot_map = {}
+    for reservation in recurring_subscriptions:
+        for day in days:
+            if day >= reservation.reservation_date and day.weekday() == reservation.reservation_date.weekday():
+                slot_map.setdefault((day, reservation.reservation_hour), reservation)
+
+    for reservation in dated_reservations:
+        slot_map[(reservation.reservation_date, reservation.reservation_hour)] = reservation
 
     form = ReservationForm()
     form.field_id.choices = [(f.id, f.name) for f in fields]
@@ -104,21 +166,19 @@ def create_reservation():
             form.customer_name.data,
             request.headers.get("User-Agent", "")[:180],
         )
-        exists = Reservation.query.filter_by(
-            field_id=form.field_id.data,
-            reservation_date=form.reservation_date.data,
-            reservation_hour=form.reservation_hour.data,
-            status="active",
-        ).first()
-        if exists:
+        if _has_slot_conflict(
+            form.field_id.data,
+            form.reservation_date.data,
+            form.reservation_hour.data,
+            form.reservation_type.data,
+        ):
             current_app.logger.warning(
-                "CALENDAR_CREATE_CONFLICT user=%s role=%s field_id=%s date=%s hour=%s existing_id=%s",
+                "CALENDAR_CREATE_CONFLICT user=%s role=%s field_id=%s date=%s hour=%s",
                 current_user.username,
                 current_user.role,
                 form.field_id.data,
                 form.reservation_date.data.isoformat() if form.reservation_date.data else None,
                 form.reservation_hour.data,
-                exists.id,
             )
             flash("Bu saha ve saat için mevcut bir rezervasyon var.", "danger")
         else:
@@ -178,15 +238,12 @@ def edit_reservation(reservation_id):
     ]
 
     if form.validate_on_submit():
-        conflict = (
-            Reservation.query.filter_by(
-                field_id=form.field_id.data,
-                reservation_date=form.reservation_date.data,
-                reservation_hour=form.reservation_hour.data,
-                status="active",
-            )
-            .filter(Reservation.id != reservation.id)
-            .first()
+        conflict = _has_slot_conflict(
+            form.field_id.data,
+            form.reservation_date.data,
+            form.reservation_hour.data,
+            form.reservation_type.data,
+            exclude_id=reservation.id,
         )
         if conflict:
             flash("Slot çakışması var.", "danger")
