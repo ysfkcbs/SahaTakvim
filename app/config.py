@@ -11,7 +11,7 @@ DEFAULT_SQLITE_PATH = INSTANCE_DIR / "app.db"
 def build_database_uri():
     database_url = os.getenv("DATABASE_URL", "").strip()
     if database_url:
-        # Render/Heroku compatibility
+        # Some providers expose PostgreSQL URLs with the legacy postgres:// scheme.
         if database_url.startswith("postgres://"):
             return database_url.replace("postgres://", "postgresql://", 1)
 
