@@ -35,7 +35,7 @@ def create_app(config_name=None):
     def load_user(user_id):
         from .models import User
 
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
     register_blueprints(app)
     register_shell_context(app)
@@ -93,13 +93,13 @@ def register_cli_commands(app):
             db.session.add(admin)
 
         if Field.query.count() == 0:
-            db.session.add(Field(name="Merkez Saha", rental_price=2500, subscription_price=2000, open_hour=17, close_hour=2))
+            db.session.add(Field(name="Merkez Saha", rental_price=2500, subscription_price=2000, open_hour=19, close_hour=2))
 
         if Setting.query.count() == 0:
             db.session.add_all(
                 [
                     Setting(key="currency", value="TRY"),
-                    Setting(key="default_open_hour", value="17"),
+                    Setting(key="default_open_hour", value="19"),
                     Setting(key="default_close_hour", value="2"),
                 ]
             )

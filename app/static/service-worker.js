@@ -1,4 +1,4 @@
-const CACHE_NAME = 'saha-takvim-shell-v7';
+const CACHE_NAME = 'saha-takvim-shell-v11';
 const APP_SHELL = [
   '/manifest.webmanifest',
   '/static/css/style.css',

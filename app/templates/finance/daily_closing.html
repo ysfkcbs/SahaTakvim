@@ -1,136 +1,127 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="page-header page-header-stack mb-3">
-  <div>
-    <h3 class="page-title">Gün Sonu Kapanışı</h3>
-    <p class="page-subtitle">Kart, nakit ve IBAN tutarlarını hızlıca girip kapanışı kaydedin.</p>
-  </div>
-</div>
-
-<div class="row g-3 mb-3">
-  <div class="col-6 col-xl-4">
-    <div class="card stat-card daily-summary-card">
-      <div class="card-body">
-        <small>Bu Ay Kart</small>
-        <h4>₺{{ '%.0f'|format(month_card_total|float) }}</h4>
-        <span class="daily-summary-period">{{ current_month_label }}</span>
-      </div>
+<section class="daily-ledger-page">
+  <header class="daily-ledger-header">
+    <div>
+      <h2>Gün Sonu</h2>
+      <p>{{ current_month_label }} ayı kapanış kayıtları</p>
     </div>
-  </div>
-  <div class="col-6 col-xl-4">
-    <div class="card stat-card daily-summary-card">
-      <div class="card-body">
-        <small>Bu Ay Nakit</small>
-        <h4>₺{{ '%.0f'|format(month_cash_total|float) }}</h4>
-        <span class="daily-summary-period">{{ current_month_label }}</span>
-      </div>
+    <div class="daily-ledger-actions">
+      <a class="daily-ledger-period-btn" href="{{ prev_month_url }}">Önceki Ay</a>
+      <a class="daily-ledger-period-btn" href="{{ next_month_url }}">Sonraki Ay</a>
+      <button
+        type="button"
+        class="daily-ledger-new-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#dailyClosingModal"
+        data-mode="new"
+        data-default-date="{{ default_closing_date.isoformat() }}">
+        Yeni Kapanış Girişi
+      </button>
     </div>
-  </div>
-  <div class="col-12 col-xl-4">
-    <div class="card stat-card daily-summary-card">
-      <div class="card-body">
-        <small>Bu Ay IBAN</small>
-        <h4>₺{{ '%.0f'|format(month_iban_total|float) }}</h4>
-        <span class="daily-summary-period">{{ current_month_label }}</span>
-      </div>
+  </header>
+
+  <section class="daily-ledger-table-panel">
+    <div class="daily-ledger-table-wrap">
+      <table class="daily-ledger-table">
+        <thead>
+          <tr>
+            <th>Tarih</th>
+            <th>Nakit</th>
+            <th>Kart</th>
+            <th>IBAN</th>
+            <th>Günlük Toplam</th>
+            <th class="daily-ledger-action-head">İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in closings %}
+            {% set daily_total = (c.cash_total or 0) + (c.card_total or 0) + (c.iban_total or 0) %}
+            <tr>
+              <td>{{ c.closing_date.strftime('%d.%m.%Y') }}</td>
+              <td>₺{{ '%.2f'|format((c.cash_total or 0)|float) }}</td>
+              <td>₺{{ '%.2f'|format((c.card_total or 0)|float) }}</td>
+              <td>₺{{ '%.2f'|format((c.iban_total or 0)|float) }}</td>
+              <td><strong>₺{{ '%.2f'|format(daily_total|float) }}</strong></td>
+              <td>
+                <button
+                  type="button"
+                  class="daily-ledger-edit-btn"
+                  data-bs-toggle="modal"
+                  data-bs-target="#dailyClosingModal"
+                  data-mode="edit"
+                  data-date="{{ c.closing_date.isoformat() }}"
+                  data-cash="{{ '%.2f'|format((c.cash_total or 0)|float) }}"
+                  data-card="{{ '%.2f'|format((c.card_total or 0)|float) }}"
+                  data-iban="{{ '%.2f'|format((c.iban_total or 0)|float) }}"
+                  data-notes="{{ c.notes or '' }}">
+                  Düzelt
+                </button>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="daily-ledger-empty">Bu ay için kapanış kaydı yok.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-  </div>
-</div>
+  </section>
+</section>
 
-<div class="daily-closing-layout row g-4">
-  <div class="col-lg-5">
-    <form method="post" class="card daily-closing-form-card">
-      <div class="card-body p-4 p-md-4">
-        {{ form.hidden_tag() }}
+<div class="modal fade" id="dailyClosingModal" tabindex="-1" aria-labelledby="dailyClosingModalTitle">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content daily-closing-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="dailyClosingModalTitle">Yeni Kapanış Girişi</h5>
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
 
-        <div class="daily-closing-topbar">
-          <div>
-            <span class="daily-closing-kicker">Bugünün Kasa Özeti</span>
-            <h4 class="daily-closing-total-title">Toplam</h4>
-          </div>
-          <div class="daily-closing-total-box">
-            <small>Genel Toplam</small>
-            <strong id="daily_closing_total">0,00</strong>
-          </div>
-        </div>
+      <form method="post" action="{{ url_for('finance.daily_closing') }}">
+        <div class="modal-body">
+          {{ form.hidden_tag() }}
 
-        <div class="mb-3">
-          {{ form.closing_date.label(class='form-label auth-label') }}
-          {{ form.closing_date(class='form-control form-control-lg', id='closing_date_input') }}
-        </div>
-
-        <div class="daily-closing-inputs">
-          <div class="daily-amount-card">
-            <label class="form-label daily-amount-label" for="card_total_input">Kart</label>
-            <div class="daily-amount-field">
-              <span class="daily-amount-currency">₺</span>
-              {{ form.card_total(class='form-control form-control-lg daily-amount-input', id='card_total_input', inputmode='decimal', placeholder='0', autocomplete='off') }}
-            </div>
+          <div class="reservation-summary daily-closing-modal-summary">
+            <span id="daily_closing_modal_summary">Gün sonu kapanışı hazırlanıyor.</span>
           </div>
 
-          <div class="daily-amount-card">
-            <label class="form-label daily-amount-label" for="cash_total_input">Nakit</label>
-            <div class="daily-amount-field">
-              <span class="daily-amount-currency">₺</span>
+          <div class="mb-3">
+            {{ form.closing_date.label(class='form-label') }}
+            {{ form.closing_date(class='form-control form-control-lg', id='closing_date_input') }}
+          </div>
+
+          <div class="daily-closing-modal-grid">
+            <div>
+              <label class="form-label" for="cash_total_input">Nakit</label>
               {{ form.cash_total(class='form-control form-control-lg daily-amount-input', id='cash_total_input', inputmode='decimal', placeholder='0', autocomplete='off') }}
             </div>
-          </div>
-
-          <div class="daily-amount-card">
-            <label class="form-label daily-amount-label" for="iban_total_input">IBAN</label>
-            <div class="daily-amount-field">
-              <span class="daily-amount-currency">₺</span>
+            <div>
+              <label class="form-label" for="card_total_input">Kart</label>
+              {{ form.card_total(class='form-control form-control-lg daily-amount-input', id='card_total_input', inputmode='decimal', placeholder='0', autocomplete='off') }}
+            </div>
+            <div>
+              <label class="form-label" for="iban_total_input">IBAN</label>
               {{ form.iban_total(class='form-control form-control-lg daily-amount-input', id='iban_total_input', inputmode='decimal', placeholder='0', autocomplete='off') }}
             </div>
           </div>
+
+          <div class="daily-closing-modal-total">
+            <span>Toplam</span>
+            <strong id="daily_closing_total">0,00</strong>
+            <strong id="daily_closing_total_sticky" class="visually-hidden">0,00</strong>
+          </div>
+
+          <div class="mt-3">
+            {{ form.notes.label(class='form-label') }}
+            {{ form.notes(class='form-control', id='notes_input', rows='3', placeholder='Not') }}
+          </div>
         </div>
 
-        <div class="mt-3">
-          {{ form.notes.label(class='form-label') }}
-          {{ form.notes(class='form-control daily-notes-input', rows='3', placeholder='İsteğe bağlı not ekleyin') }}
+        <div class="modal-footer">
+          {{ form.submit(class='btn btn-primary btn-lg w-100', id='daily_closing_submit') }}
         </div>
-
-        <div class="daily-closing-help mt-3">
-          Tutar alanlarına <strong>4430</strong>, <strong>1.250,50</strong> veya <strong>1250.50</strong> formatında giriş yapabilirsiniz.
-        </div>
-
-        <div class="daily-closing-actions d-none d-lg-flex">
-          {{ form.submit(class='btn btn-success btn-lg w-100 daily-submit-btn') }}
-        </div>
-      </div>
-
-      <div class="daily-closing-sticky-action d-lg-none">
-        <div class="daily-closing-sticky-total">
-          <small>Toplam</small>
-          <strong id="daily_closing_total_sticky">0,00</strong>
-        </div>
-        {{ form.submit(class='btn btn-success btn-lg daily-submit-btn') }}
-      </div>
-    </form>
-  </div>
-
-  <div class="col-lg-7">
-    <div class="card">
-      <div class="card-header">Son Kapanış Kayıtları</div>
-      <div class="card-body p-0 p-md-3">
-        <table class="table table-sm mobile-stack-table mb-0">
-          <thead><tr><th>Tarih</th><th>Kart</th><th>Nakit</th><th>IBAN</th><th>Günlük Toplam</th><th>Giren</th></tr></thead>
-          <tbody>
-          {% for c in closings %}
-          <tr>
-            <td data-label="Tarih">{{c.closing_date}}</td>
-            <td data-label="Kart">{{c.card_total}}</td>
-            <td data-label="Nakit">{{c.cash_total}}</td>
-            <td data-label="IBAN">{{c.iban_total}}</td>
-            <td data-label="Günlük Toplam"><strong class="daily-row-total">₺{{ '%.2f'|format(((c.card_total or 0) + (c.cash_total or 0) + (c.iban_total or 0))|float) }}</strong></td>
-            <td data-label="Giren">{{c.entered_by.username}}</td>
-          </tr>
-          {% else %}
-          <tr><td colspan="6">Kayıt yok.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      </form>
     </div>
   </div>
 </div>

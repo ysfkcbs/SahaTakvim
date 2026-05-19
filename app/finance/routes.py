@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from flask import Blueprint, flash, redirect, render_template, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app.extensions import db
@@ -97,16 +97,44 @@ def daily_closing():
         closing.entered_by_user_id = current_user.id
         db.session.commit()
         flash("Gün sonu kapanışı kaydedildi.", "success")
-        return redirect(url_for("finance.daily_closing"))
+        return redirect(
+            url_for(
+                "finance.daily_closing",
+                year=form.closing_date.data.year,
+                month=form.closing_date.data.month,
+            )
+        )
     elif form.is_submitted():
         _flash_form_errors(form)
 
-    closings = DailyClosing.query.order_by(DailyClosing.closing_date.desc()).all()
     today = date.today()
-    month_closings = [closing for closing in closings if closing.closing_date.year == today.year and closing.closing_date.month == today.month]
+    selected_year = request.args.get("year", today.year, type=int)
+    selected_month = request.args.get("month", today.month, type=int)
+    if selected_month < 1 or selected_month > 12:
+        selected_year = today.year
+        selected_month = today.month
+
+    if selected_month == 1:
+        prev_year, prev_month = selected_year - 1, 12
+    else:
+        prev_year, prev_month = selected_year, selected_month - 1
+
+    if selected_month == 12:
+        next_year, next_month = selected_year + 1, 1
+    else:
+        next_year, next_month = selected_year, selected_month + 1
+
+    all_closings = DailyClosing.query.order_by(DailyClosing.closing_date.desc()).all()
+    month_closings = [
+        closing
+        for closing in all_closings
+        if closing.closing_date.year == selected_year and closing.closing_date.month == selected_month
+    ]
+    closings = month_closings
     month_card_total = sum((closing.card_total or Decimal("0")) for closing in month_closings)
     month_cash_total = sum((closing.cash_total or Decimal("0")) for closing in month_closings)
     month_iban_total = sum((closing.iban_total or Decimal("0")) for closing in month_closings)
+    default_closing_date = today if (selected_year == today.year and selected_month == today.month) else date(selected_year, selected_month, 1)
     return render_template(
         "finance/daily_closing.html",
         form=form,
@@ -114,7 +142,10 @@ def daily_closing():
         month_card_total=month_card_total,
         month_cash_total=month_cash_total,
         month_iban_total=month_iban_total,
-        current_month_label=today.strftime("%m.%Y"),
+        current_month_label=f"{selected_month:02d}.{selected_year}",
+        default_closing_date=default_closing_date,
+        prev_month_url=url_for("finance.daily_closing", year=prev_year, month=prev_month),
+        next_month_url=url_for("finance.daily_closing", year=next_year, month=next_month),
     )
 
 

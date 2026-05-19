@@ -8,10 +8,8 @@ def week_start_for(day: date):
 def business_hours(open_hour=17, close_hour=2):
     hours = []
     h = open_hour
-    while True:
+    while h != close_hour:
         hours.append(h)
-        if h == close_hour:
-            break
         h = (h + 1) % 24
     return hours
 

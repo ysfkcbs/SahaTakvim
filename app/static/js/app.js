@@ -118,19 +118,57 @@ document.addEventListener('DOMContentLoaded', () => {
     .filter(Boolean);
   const closingTotal = document.getElementById('daily_closing_total');
   const closingTotalSticky = document.getElementById('daily_closing_total_sticky');
+  const closingModal = document.getElementById('dailyClosingModal');
+  const closingDateInput = document.getElementById('closing_date_input');
+  const closingNotesInput = document.getElementById('notes_input');
+  const closingModalTitle = document.getElementById('dailyClosingModalTitle');
+  const closingModalSummary = document.getElementById('daily_closing_modal_summary');
+  const closingSubmit = document.getElementById('daily_closing_submit');
+
+  const syncClosingTotal = () => {
+    const total = closingInputs.reduce((sum, input) => sum + parseLocalizedNumber(input.value), 0);
+    const formatted = formatCurrencyNumber(total);
+    if (closingTotal) closingTotal.textContent = formatted;
+    if (closingTotalSticky) closingTotalSticky.textContent = formatted;
+    if (closingModalSummary && closingDateInput) {
+      const dateText = closingDateInput.value || 'Tarih seçilmedi';
+      closingModalSummary.textContent = `${dateText} için toplam ${formatted} TL.`;
+    }
+  };
+
+  if (closingModal) {
+    closingModal.addEventListener('show.bs.modal', event => {
+      const trigger = event.relatedTarget;
+      const mode = trigger?.dataset?.mode || 'new';
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      if (closingModalTitle) {
+        closingModalTitle.textContent = mode === 'edit' ? 'Kapanış Kaydını Düzelt' : 'Yeni Kapanış Girişi';
+      }
+      if (closingSubmit) {
+        closingSubmit.value = mode === 'edit' ? 'Güncelle' : 'Kaydet';
+      }
+
+      if (closingDateInput) closingDateInput.value = trigger?.dataset?.date || trigger?.dataset?.defaultDate || today;
+      const cashInput = document.getElementById('cash_total_input');
+      const cardInput = document.getElementById('card_total_input');
+      const ibanInput = document.getElementById('iban_total_input');
+      if (cashInput) cashInput.value = trigger?.dataset?.cash || '';
+      if (cardInput) cardInput.value = trigger?.dataset?.card || '';
+      if (ibanInput) ibanInput.value = trigger?.dataset?.iban || '';
+      if (closingNotesInput) closingNotesInput.value = trigger?.dataset?.notes || '';
+
+      syncClosingTotal();
+    });
+  }
 
   if (closingInputs.length && (closingTotal || closingTotalSticky)) {
-    const syncClosingTotal = () => {
-      const total = closingInputs.reduce((sum, input) => sum + parseLocalizedNumber(input.value), 0);
-      const formatted = formatCurrencyNumber(total);
-      if (closingTotal) closingTotal.textContent = formatted;
-      if (closingTotalSticky) closingTotalSticky.textContent = formatted;
-    };
-
     closingInputs.forEach(input => {
       input.addEventListener('input', syncClosingTotal);
       input.addEventListener('change', syncClosingTotal);
     });
+    if (closingDateInput) closingDateInput.addEventListener('change', syncClosingTotal);
 
     syncClosingTotal();
   }

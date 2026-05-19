@@ -11,7 +11,7 @@ from app.models import Field, Reservation
 
 calendar_bp = Blueprint("calendar", __name__)
 
-WEEKDAY_NAMES_TR = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+WEEKDAY_NAMES_TR = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
 
 
 @calendar_bp.route("/weekly")
@@ -27,7 +27,10 @@ def weekly():
         selected_field = fields[0].id
     selected_field_obj = next((field for field in fields if field.id == selected_field), None)
 
-    hours = business_hours()
+    hours = business_hours(
+        selected_field_obj.open_hour if selected_field_obj else 17,
+        selected_field_obj.close_hour if selected_field_obj else 2,
+    )
     days = [start + timedelta(days=i) for i in range(7)]
 
     reservations = (
@@ -80,7 +83,14 @@ def create_reservation():
     form = ReservationForm()
     fields = Field.query.filter_by(is_active=True).order_by(Field.name.asc()).all()
     form.field_id.choices = [(f.id, f.name) for f in fields]
-    form.reservation_hour.choices = [(h, hour_label(h)) for h in business_hours()]
+    posted_field_id = request.form.get("field_id", type=int)
+    selected_form_field = next((field for field in fields if field.id == posted_field_id), fields[0] if fields else None)
+    form.reservation_hour.choices = [
+        (h, hour_label(h)) for h in business_hours(
+            selected_form_field.open_hour if selected_form_field else 17,
+            selected_form_field.close_hour if selected_form_field else 2,
+        )
+    ]
 
     if form.validate_on_submit():
         current_app.logger.warning(
@@ -158,7 +168,14 @@ def edit_reservation(reservation_id):
     form = ReservationForm(obj=reservation)
     fields = Field.query.filter_by(is_active=True).order_by(Field.name.asc()).all()
     form.field_id.choices = [(f.id, f.name) for f in fields]
-    form.reservation_hour.choices = [(h, hour_label(h)) for h in business_hours()]
+    selected_field_id = request.form.get("field_id", type=int) if request.method == "POST" else reservation.field_id
+    selected_form_field = next((field for field in fields if field.id == selected_field_id), None)
+    form.reservation_hour.choices = [
+        (h, hour_label(h)) for h in business_hours(
+            selected_form_field.open_hour if selected_form_field else 17,
+            selected_form_field.close_hour if selected_form_field else 2,
+        )
+    ]
 
     if form.validate_on_submit():
         conflict = (
