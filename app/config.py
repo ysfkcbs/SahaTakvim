@@ -2,10 +2,14 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 INSTANCE_DIR = BASE_DIR / "instance"
 DEFAULT_SQLITE_PATH = INSTANCE_DIR / "app.db"
+
+load_dotenv(BASE_DIR / ".env")
 
 
 def build_database_uri():
