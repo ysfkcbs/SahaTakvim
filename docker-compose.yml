@@ -5,16 +5,11 @@ services:
       - "8000:8000"
     environment:
       FLASK_ENV: production
-      SECRET_KEY: change-this-secret
-      DATABASE_URL: sqlite:////app/instance/app.db
-      DEFAULT_ADMIN_USERNAME: admin
-      DEFAULT_ADMIN_PASSWORD: Admin123!
-    volumes:
-      - saha-instance:/app/instance
+      SECRET_KEY: ${SECRET_KEY:-change-this-secret}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set in .env}
+      DEFAULT_ADMIN_USERNAME: ${DEFAULT_ADMIN_USERNAME:-admin}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-Admin123!}
     command: >
       sh -c "flask db upgrade &&
              flask seed-admin &&
              gunicorn --bind 0.0.0.0:8000 wsgi:app"
-
-volumes:
-  saha-instance:

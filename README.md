@@ -40,13 +40,13 @@ docker-compose.yml
 .dockerignore
 ```
 
-`docker-compose.yml` şu an SQLite kullanır ve veriyi Docker volume içinde saklar:
+`docker-compose.yml` PostgreSQL bağlantısını `.env` içindeki `DATABASE_URL` değerinden okur. Docker içinden Windows host üzerindeki PostgreSQL'e bağlanmak için host değeri genellikle `host.docker.internal` olmalıdır.
 
 ```text
-saha-instance:/app/instance
+DATABASE_URL=postgresql://postgres:your-password@host.docker.internal:5432/SahaTakvim
 ```
 
-PostgreSQL geçişi bir sonraki adımda yapılacaktır.
+`.env` dosyası Git'e eklenmez; yerel şifre ve bağlantı bilgileri bu dosyada tutulur.
 
 ## Faydalı Docker Komutları
 
@@ -83,17 +83,15 @@ docker compose down -v
 
 ## Ortam Değişkenleri
 
-Local Docker ortamı için temel değişkenler `docker-compose.yml` içinde tanımlıdır.
+Local Docker ortamı için temel değişkenler `.env` dosyasında tanımlıdır.
 
 ```text
 FLASK_ENV=production
 SECRET_KEY=change-this-secret
-DATABASE_URL=sqlite:////app/instance/app.db
+DATABASE_URL=postgresql://postgres:your-password@host.docker.internal:5432/SahaTakvim
 DEFAULT_ADMIN_USERNAME=admin
 DEFAULT_ADMIN_PASSWORD=Admin123!
 ```
-
-PostgreSQL geçişinde `DATABASE_URL` PostgreSQL bağlantı adresiyle değiştirilecektir.
 
 ## Lokal Python ile Çalıştırma
 
