@@ -48,6 +48,30 @@ DATABASE_URL=postgresql://postgres:your-password@host.docker.internal:5432/SahaT
 
 `.env` dosyası Git'e eklenmez; yerel şifre ve bağlantı bilgileri bu dosyada tutulur.
 
+## Render ile Canlı Ortam
+
+Telefon ve bilgisayardan aynı verileri görmek için canlı uygulama Render üzerinde tek bir PostgreSQL veritabanına bağlanmalıdır. GitHub sadece kodu taşır; uygulama verisi GitHub'da tutulmaz.
+
+Render Web Service ortam değişkenleri:
+
+```text
+FLASK_ENV=production
+SECRET_KEY=uzun-rastgele-bir-deger
+DATABASE_URL=Render PostgreSQL internal database URL
+SESSION_COOKIE_SECURE=true
+REMEMBER_COOKIE_SECURE=true
+DEFAULT_ADMIN_USERNAME=admin
+DEFAULT_ADMIN_PASSWORD=guclu-bir-sifre
+```
+
+Render Docker deploy sırasında uygulama şu komutla açılır:
+
+```bash
+flask db upgrade && flask seed-admin && gunicorn --bind 0.0.0.0:${PORT:-8000} wsgi:app
+```
+
+Bu yüzden migration'lar ve varsayılan admin hesabı deploy sırasında otomatik hazırlanır.
+
 ## Faydalı Docker Komutları
 
 ```bash
