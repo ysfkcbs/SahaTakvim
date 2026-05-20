@@ -1,9 +1,20 @@
 import os
+from urllib.parse import urlparse
 
 from dotenv import load_dotenv
 from flask import Flask, request
 
 from .extensions import csrf, db, login_manager, migrate
+
+
+def _database_log_context(database_uri):
+    parsed = urlparse(database_uri)
+    return {
+        "scheme": parsed.scheme or "unknown",
+        "host": parsed.hostname or "local-file",
+        "database": (parsed.path or "").lstrip("/") or "memory",
+        "uses_sqlite": parsed.scheme.startswith("sqlite"),
+    }
 
 
 def create_app(config_name=None):
@@ -16,6 +27,15 @@ def create_app(config_name=None):
     from .config import config_map
 
     app.config.from_object(config_map.get(env, config_map["default"]))
+    db_context = _database_log_context(app.config["SQLALCHEMY_DATABASE_URI"])
+    app.logger.warning(
+        "DATABASE_CONFIG env=%s scheme=%s host=%s database=%s uses_sqlite=%s",
+        env,
+        db_context["scheme"],
+        db_context["host"],
+        db_context["database"],
+        db_context["uses_sqlite"],
+    )
 
     db.init_app(app)
     migrate.init_app(app, db)

@@ -28,6 +28,9 @@ def build_database_uri():
 
         return database_url
 
+    if os.getenv("FLASK_ENV", "development") == "production":
+        raise RuntimeError("DATABASE_URL must be set in production. Refusing to use ephemeral SQLite storage.")
+
     INSTANCE_DIR.mkdir(parents=True, exist_ok=True)
     return f"sqlite:///{DEFAULT_SQLITE_PATH.as_posix()}"
 
