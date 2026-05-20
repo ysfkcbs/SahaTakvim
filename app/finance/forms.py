@@ -40,13 +40,40 @@ def normalize_decimal_input(value):
         return value
 
 
+class LocalizedDecimalField(DecimalField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            normalized = normalize_decimal_input(valuelist[0])
+            if isinstance(normalized, Decimal):
+                valuelist = [str(normalized)]
+            else:
+                valuelist = [normalized]
+        super().process_formdata(valuelist)
+
+
 class DailyClosingForm(FlaskForm):
     closing_date = DateField("Tarih", default=date.today, validators=[DataRequired()])
-    card_total = DecimalField("Kart", validators=[DataRequired(), NumberRange(min=0)], filters=[normalize_decimal_input])
-    cash_total = DecimalField("Nakit", validators=[DataRequired(), NumberRange(min=0)], filters=[normalize_decimal_input])
-    iban_total = DecimalField("IBAN", validators=[DataRequired(), NumberRange(min=0)], filters=[normalize_decimal_input])
+    card_total = LocalizedDecimalField("Kart", validators=[Optional(), NumberRange(min=0)])
+    cash_total = LocalizedDecimalField("Nakit", validators=[Optional(), NumberRange(min=0)])
+    iban_total = LocalizedDecimalField("IBAN", validators=[Optional(), NumberRange(min=0)])
     notes = TextAreaField("Not", validators=[Optional()])
     submit = SubmitField("Kapanışı Kaydet")
+
+
+    def validate(self, extra_validators=None):
+        if not super().validate(extra_validators):
+            return False
+
+        amount_fields = [self.card_total, self.cash_total, self.iban_total]
+        if not any(field.data is not None for field in amount_fields):
+            self.cash_total.errors.append("Nakit, kart veya IBAN alanlarindan en az biri girilmelidir.")
+            return False
+
+        for field in amount_fields:
+            if field.data is None:
+                field.data = Decimal("0")
+
+        return True
 
 
 class TransactionForm(FlaskForm):
