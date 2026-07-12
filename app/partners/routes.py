@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.main.utils import role_required
@@ -27,9 +28,14 @@ def ledger():
             share = PartnerShare(year=form.year.data, month=form.month.data, partner_name=form.partner_name.data)
             db.session.add(share)
         share.amount = form.amount.data
-        db.session.commit()
-        flash("Ortaklık payı kaydedildi.", "success")
-        return redirect(url_for("partners.ledger", year=form.year.data))
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Bu ay/ortak için kayıt az önce başka bir kullanıcı tarafından güncellendi. Sayfayı yenileyip tekrar deneyin.", "danger")
+        else:
+            flash("Ortaklık payı kaydedildi.", "success")
+            return redirect(url_for("partners.ledger", year=form.year.data))
 
     selected_year = request.args.get("year", date.today().year, type=int)
 

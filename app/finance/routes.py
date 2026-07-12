@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.finance.forms import DailyClosingForm, TransactionForm
@@ -106,15 +107,20 @@ def daily_closing():
         closing.iban_total = form.iban_total.data
         closing.notes = form.notes.data
         closing.entered_by_user_id = current_user.id
-        db.session.commit()
-        flash("Gün sonu kapanışı kaydedildi.", "success")
-        return redirect(
-            url_for(
-                "finance.daily_closing",
-                year=form.closing_date.data.year,
-                month=form.closing_date.data.month,
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("Bu tarih için kapanış az önce başka bir kullanıcı tarafından kaydedildi. Sayfayı yenileyip tekrar deneyin.", "danger")
+        else:
+            flash("Gün sonu kapanışı kaydedildi.", "success")
+            return redirect(
+                url_for(
+                    "finance.daily_closing",
+                    year=form.closing_date.data.year,
+                    month=form.closing_date.data.month,
+                )
             )
-        )
     elif form.is_submitted():
         _flash_form_errors(form)
 

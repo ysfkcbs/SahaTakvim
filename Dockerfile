@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "flask db upgrade && flask seed-admin && gunicorn --bind 0.0.0.0:${PORT:-8000} wsgi:app"]
+CMD ["sh", "-c", "flask db upgrade && flask seed-admin && gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 2 --threads 4 --worker-class gthread --timeout 60 wsgi:app"]

@@ -2,6 +2,8 @@ from datetime import date, datetime, timedelta
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 
 from app.calendar.forms import ReservationForm
 from app.calendar.utils import business_hours, hour_label, week_start_for
@@ -10,6 +12,14 @@ from app.models import Field, Reservation
 
 
 calendar_bp = Blueprint("calendar", __name__)
+
+
+def _lock_field_hour(field_id, hour):
+    # Serializes concurrent check-then-insert races (exact slot and recurring
+    # subscription checks alike) for this field+hour; Postgres-only because the
+    # subscription conflict check has no backing unique constraint to fall back on.
+    if db.engine.dialect.name == "postgresql":
+        db.session.execute(text("SELECT pg_advisory_xact_lock(:field_id, :hour)"), {"field_id": field_id, "hour": hour})
 
 
 def _matching_subscription_query(field_id, reservation_date, reservation_hour, exclude_id=None):
@@ -166,6 +176,7 @@ def create_reservation():
             form.customer_name.data,
             request.headers.get("User-Agent", "")[:180],
         )
+        _lock_field_hour(form.field_id.data, form.reservation_hour.data)
         if _has_slot_conflict(
             form.field_id.data,
             form.reservation_date.data,
@@ -194,18 +205,31 @@ def create_reservation():
                 created_by_user_id=current_user.id,
             )
             db.session.add(r)
-            db.session.commit()
-            current_app.logger.warning(
-                "CALENDAR_CREATE_SUCCESS user=%s role=%s reservation_id=%s field_id=%s date=%s hour=%s type=%s",
-                current_user.username,
-                current_user.role,
-                r.id,
-                r.field_id,
-                r.reservation_date.isoformat(),
-                r.reservation_hour,
-                r.reservation_type,
-            )
-            flash("Rezervasyon oluşturuldu.", "success")
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                current_app.logger.warning(
+                    "CALENDAR_CREATE_RACE_CONFLICT user=%s role=%s field_id=%s date=%s hour=%s",
+                    current_user.username,
+                    current_user.role,
+                    form.field_id.data,
+                    form.reservation_date.data.isoformat(),
+                    form.reservation_hour.data,
+                )
+                flash("Bu saha ve saat için az önce başka bir rezervasyon oluşturuldu. Lütfen tekrar deneyin.", "danger")
+            else:
+                current_app.logger.warning(
+                    "CALENDAR_CREATE_SUCCESS user=%s role=%s reservation_id=%s field_id=%s date=%s hour=%s type=%s",
+                    current_user.username,
+                    current_user.role,
+                    r.id,
+                    r.field_id,
+                    r.reservation_date.isoformat(),
+                    r.reservation_hour,
+                    r.reservation_type,
+                )
+                flash("Rezervasyon oluşturuldu.", "success")
     else:
         current_app.logger.warning(
             "CALENDAR_CREATE_INVALID user=%s role=%s field_id=%s date=%s hour=%s errors=%s ua=%s",
@@ -238,6 +262,7 @@ def edit_reservation(reservation_id):
     ]
 
     if form.validate_on_submit():
+        _lock_field_hour(form.field_id.data, form.reservation_hour.data)
         conflict = _has_slot_conflict(
             form.field_id.data,
             form.reservation_date.data,
@@ -249,9 +274,14 @@ def edit_reservation(reservation_id):
             flash("Slot çakışması var.", "danger")
         else:
             form.populate_obj(reservation)
-            db.session.commit()
-            flash("Rezervasyon güncellendi.", "success")
-            return redirect(url_for("calendar.weekly", start=form.reservation_date.data.isoformat(), field=form.field_id.data))
+            try:
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                flash("Bu saha ve saat için az önce başka bir rezervasyon oluşturuldu. Lütfen tekrar deneyin.", "danger")
+            else:
+                flash("Rezervasyon güncellendi.", "success")
+                return redirect(url_for("calendar.weekly", start=form.reservation_date.data.isoformat(), field=form.field_id.data))
 
     return render_template("reservations/edit.html", form=form, reservation=reservation)
 
