@@ -7,7 +7,12 @@ from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.finance.forms import DailyClosingForm, TransactionForm
-from app.finance.services import actual_total, forecast_next_months, reservation_income_for_month
+from app.finance.services import (
+    actual_total,
+    daily_closing_total_for_month,
+    forecast_next_months,
+    reservation_income_for_month,
+)
 from app.main.utils import role_required
 from app.models import DailyClosing, Expense, ExpenseCategory, Income, IncomeCategory
 
@@ -76,7 +81,11 @@ def _render_balance_page(form, editing_record=None, form_mode_title="Yeni Kayıt
     from datetime import date
 
     today = date.today()
-    month_income = reservation_income_for_month(today.year, today.month) + actual_total(Income, today.year, today.month)
+    month_income = (
+        reservation_income_for_month(today.year, today.month)
+        + actual_total(Income, today.year, today.month)
+        + daily_closing_total_for_month(today.year, today.month)
+    )
     month_expense = actual_total(Expense, today.year, today.month)
     projection = forecast_next_months(3)
     return render_template(

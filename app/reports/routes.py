@@ -4,9 +4,9 @@ from flask import Blueprint, render_template, request, url_for
 from flask_login import login_required
 from sqlalchemy import extract
 
-from app.finance.services import actual_total, reservation_income_for_month
+from app.finance.services import actual_total, daily_closing_total_for_month, reservation_income_for_month
 from app.main.utils import role_required
-from app.models import Expense, Field, Reservation
+from app.models import Expense, Field, Income, Reservation
 
 
 reports_bp = Blueprint("reports", __name__)
@@ -50,12 +50,20 @@ def reservation_report():
     single_count = month_query.filter_by(reservation_type="tek_saatlik").count()
     subscriber_count = month_query.filter_by(reservation_type="abone").count()
 
+    income = (
+        reservation_income_for_month(selected_year, selected_month)
+        + actual_total(Income, selected_year, selected_month)
+        + daily_closing_total_for_month(selected_year, selected_month)
+    )
+    expense = actual_total(Expense, selected_year, selected_month)
+
     summary = {
         "total_count": single_count + subscriber_count,
         "single_count": single_count,
         "subscriber_count": subscriber_count,
-        "income": reservation_income_for_month(selected_year, selected_month),
-        "expense": actual_total(Expense, selected_year, selected_month),
+        "income": income,
+        "expense": expense,
+        "net": income - expense,
         "label": f"{selected_month:02d}.{selected_year}",
     }
 

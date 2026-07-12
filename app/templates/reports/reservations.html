@@ -12,11 +12,12 @@
 </div>
 
 <div class="row g-3 mb-3">
-  <div class="col-6 col-md-2"><div class="card stat-card"><div class="card-body"><small>Toplam Maç</small><h4>{{ summary.total_count }}</h4></div></div></div>
-  <div class="col-6 col-md-2"><div class="card stat-card"><div class="card-body"><small>Tek Saatlik</small><h4>{{ summary.single_count }}</h4></div></div></div>
-  <div class="col-6 col-md-2"><div class="card stat-card"><div class="card-body"><small>Abone</small><h4>{{ summary.subscriber_count }}</h4></div></div></div>
-  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><small>Toplam Gelir</small><h4>₺{{ '%.0f'|format(summary.income|float) }}</h4></div></div></div>
-  <div class="col-12 col-md-3"><div class="card stat-card"><div class="card-body"><small>Toplam Gider</small><h4>₺{{ '%.0f'|format(summary.expense|float) }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Toplam Maç</small><h4>{{ summary.total_count }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Tek Saatlik</small><h4>{{ summary.single_count }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Abone</small><h4>{{ summary.subscriber_count }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Toplam Gelir</small><h4>₺{{ '%.0f'|format(summary.income|float) }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Toplam Gider</small><h4>₺{{ '%.0f'|format(summary.expense|float) }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Net Kazanç</small><h4>₺{{ '%.0f'|format(summary.net|float) }}</h4></div></div></div>
 </div>
 
 <div class="card">

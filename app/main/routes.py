@@ -5,6 +5,7 @@ from flask_login import current_user, login_required
 from sqlalchemy import case, extract, func
 
 from app.calendar.utils import business_hours, hour_label, week_start_for
+from app.finance.services import daily_closing_total_for_month
 from app.models import DailyClosing, Expense, Field, Income, Reservation
 
 
@@ -132,7 +133,8 @@ def admin_dashboard():
         extract("month", Expense.date) == today.month,
     ).scalar()
 
-    month_income = float(reservation_income or 0) + float(other_income or 0)
+    daily_income = daily_closing_total_for_month(today.year, today.month)
+    month_income = float(reservation_income or 0) + float(other_income or 0) + daily_income
     month_expenses = float(expenses or 0)
 
     upcoming = Reservation.query.filter(Reservation.reservation_date >= today, Reservation.status == "active").order_by(

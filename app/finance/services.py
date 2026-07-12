@@ -66,7 +66,8 @@ def forecast_next_months(month_count=3):
         pending_income = recurring_total(Income, y, m, paid_only=False)
         paid_expense = recurring_total(Expense, y, m, paid_only=True)
         pending_expense = recurring_total(Expense, y, m, paid_only=False)
-        income = reservation_income_for_month(y, m) + paid_income + pending_income
+        daily_total = daily_closing_total_for_month(y, m)
+        income = reservation_income_for_month(y, m) + paid_income + pending_income + daily_total
         expense = paid_expense + pending_expense
         label = f"{y}-{m:02d}"
         data.append(
@@ -79,7 +80,7 @@ def forecast_next_months(month_count=3):
                 "pending_income": pending_income,
                 "paid_expense": paid_expense,
                 "pending_expense": pending_expense,
-                "daily_closing_total": daily_closing_total_for_month(y, m),
+                "daily_closing_total": daily_total,
             }
         )
     return data
