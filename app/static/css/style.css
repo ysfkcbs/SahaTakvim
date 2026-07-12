@@ -1420,7 +1420,7 @@ body.is-standalone .app-navbar {
 
 .finance-balance-breakdown {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 0.5rem;
 }
 
@@ -1449,6 +1449,11 @@ body.is-standalone .app-navbar {
 .finance-breakdown-card.is-unpaid {
   background: rgba(255, 193, 7, 0.18);
   color: #8a5a00;
+}
+
+.finance-breakdown-card.is-daily {
+  background: rgba(13, 110, 253, 0.12);
+  color: #0a3f7a;
 }
 
 @media (max-width: 991.98px) {

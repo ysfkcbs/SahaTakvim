@@ -2,7 +2,7 @@ from datetime import date
 
 from sqlalchemy import extract, func
 
-from app.models import Expense, Field, Income, Reservation
+from app.models import DailyClosing, Expense, Field, Income, Reservation
 
 
 def reservation_income_for_month(year: int, month: int):
@@ -43,6 +43,19 @@ def actual_total(model, year, month):
     )
 
 
+def daily_closing_total_for_month(year: int, month: int):
+    return float(
+        DailyClosing.query.with_entities(
+            func.coalesce(func.sum(DailyClosing.cash_total + DailyClosing.card_total + DailyClosing.iban_total), 0)
+        )
+        .filter(
+            extract("year", DailyClosing.closing_date) == year,
+            extract("month", DailyClosing.closing_date) == month,
+        )
+        .scalar()
+    )
+
+
 def forecast_next_months(month_count=3):
     today = date.today()
     data = []
@@ -66,6 +79,7 @@ def forecast_next_months(month_count=3):
                 "pending_income": pending_income,
                 "paid_expense": paid_expense,
                 "pending_expense": pending_expense,
+                "daily_closing_total": daily_closing_total_for_month(y, m),
             }
         )
     return data

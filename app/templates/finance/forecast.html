@@ -72,7 +72,7 @@
       {% for p in projection %}
       <tr>
         <td data-label="Ay">{{p.month}}</td>
-        <td data-label="Tahmini Gelir"><div class="finance-balance-cell"><strong>₺{{'%.0f'|format(p.income|float)}}</strong><div class="finance-balance-breakdown"><div class="finance-breakdown-card is-paid"><small>Ödendi</small><strong>₺{{'%.0f'|format(p.paid_income|float)}}</strong></div><div class="finance-breakdown-card is-unpaid"><small>Bekleyen</small><strong>₺{{'%.0f'|format(p.pending_income|float)}}</strong></div></div></div></td>
+        <td data-label="Tahmini Gelir"><div class="finance-balance-cell"><strong>₺{{'%.0f'|format(p.income|float)}}</strong><div class="finance-balance-breakdown"><div class="finance-breakdown-card is-paid"><small>Ödendi</small><strong>₺{{'%.0f'|format(p.paid_income|float)}}</strong></div><div class="finance-breakdown-card is-unpaid"><small>Bekleyen</small><strong>₺{{'%.0f'|format(p.pending_income|float)}}</strong></div><div class="finance-breakdown-card is-daily"><small>Gün Sonu Toplamı</small><strong>₺{{'%.0f'|format(p.daily_closing_total|float)}}</strong></div></div></div></td>
         <td data-label="Tahmini Gider"><div class="finance-balance-cell"><strong>₺{{'%.0f'|format(p.expense|float)}}</strong><div class="finance-balance-breakdown"><div class="finance-breakdown-card is-paid"><small>Ödendi</small><strong>₺{{'%.0f'|format(p.paid_expense|float)}}</strong></div><div class="finance-breakdown-card is-unpaid"><small>Bekleyen</small><strong>₺{{'%.0f'|format(p.pending_expense|float)}}</strong></div></div></div></td>
         <td data-label="Net"><strong class="finance-amount">₺{{'%.0f'|format(p.net|float)}}</strong></td>
       </tr>
