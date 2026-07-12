@@ -1,11 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="page-header mb-3">
+<div class="page-header page-header-stack mb-3">
   <div>
     <h3 class="page-title mb-0">Rezervasyon Raporu</h3>
-    <p class="page-subtitle">Rezervasyon listesini mobilde okunabilir kart akışıyla gözden geçirin.</p>
+    <p class="page-subtitle">{{ summary.label }} ayı özeti ve rezervasyon listesi.</p>
   </div>
+  <nav class="saha-calendar-nav" aria-label="Ay seçimi">
+    <a class="saha-calendar-nav-btn" href="{{ prev_month_url }}">Önceki Ay</a>
+    <a class="saha-calendar-nav-btn" href="{{ next_month_url }}">Sonraki Ay</a>
+  </nav>
 </div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-2"><div class="card stat-card"><div class="card-body"><small>Toplam Maç</small><h4>{{ summary.total_count }}</h4></div></div></div>
+  <div class="col-6 col-md-2"><div class="card stat-card"><div class="card-body"><small>Tek Saatlik</small><h4>{{ summary.single_count }}</h4></div></div></div>
+  <div class="col-6 col-md-2"><div class="card stat-card"><div class="card-body"><small>Abone</small><h4>{{ summary.subscriber_count }}</h4></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><small>Toplam Gelir</small><h4>₺{{ '%.0f'|format(summary.income|float) }}</h4></div></div></div>
+  <div class="col-12 col-md-3"><div class="card stat-card"><div class="card-body"><small>Toplam Gider</small><h4>₺{{ '%.0f'|format(summary.expense|float) }}</h4></div></div></div>
+</div>
+
 <div class="card">
   <div class="card-body p-0 p-md-3">
     <table class="table table-striped mobile-stack-table mb-0">

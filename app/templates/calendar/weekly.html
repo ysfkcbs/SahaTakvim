@@ -42,7 +42,8 @@
               href="{{ url_for('calendar.edit_reservation', reservation_id=r.id) }}"
               class="saha-calendar-slot is-booked {% if r.reservation_type == 'abone' %}is-subscriber{% else %}is-match{% endif %}"
               aria-label="{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }} {{ display_hour }} {{ r.customer_name }}"
-              title="{{ r.customer_name }} - {{ 'Abone' if r.reservation_type == 'abone' else 'Tek Saatlik Maç' }}">
+              title="{{ r.customer_name }} - {{ 'Abone' if r.reservation_type == 'abone' else 'Tek Saatlik Maç' }}{{ ' - Kapora alındı' if r.deposit_paid else '' }}">
+              {% if r.deposit_paid %}<span class="saha-calendar-slot-deposit" aria-hidden="true">💰</span>{% endif %}
               <span class="saha-calendar-slot-time">{{ display_hour }}</span>
               <span class="saha-calendar-slot-name">{{ r.customer_name }}</span>
             </a>

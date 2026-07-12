@@ -1,13 +1,48 @@
 from datetime import date, datetime, timedelta
 
-from flask import Blueprint, current_app, render_template, send_from_directory
+from flask import Blueprint, current_app, render_template, request, send_from_directory
 from flask_login import current_user, login_required
 from sqlalchemy import case, extract, func
 
+from app.calendar.utils import business_hours, hour_label, week_start_for
 from app.models import DailyClosing, Expense, Field, Income, Reservation
 
 
 main_bp = Blueprint("main", __name__)
+
+WEEKDAY_NAMES_TR = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
+
+
+def _public_occupancy(start, field):
+    end = start + timedelta(days=6)
+    days = [start + timedelta(days=i) for i in range(7)]
+    hours = business_hours(field.open_hour, field.close_hour) if field else business_hours()
+
+    occupied = set()
+    if field:
+        rows = (
+            Reservation.query.with_entities(Reservation.reservation_date, Reservation.reservation_hour, Reservation.reservation_type)
+            .filter(Reservation.field_id == field.id, Reservation.status == "active")
+            .filter(Reservation.reservation_date.between(start, end) | (Reservation.reservation_type == "abone"))
+            .all()
+        )
+        for r_date, r_hour, r_type in rows:
+            if r_type == "abone":
+                for day in days:
+                    if day >= r_date and day.weekday() == r_date.weekday():
+                        occupied.add((day, r_hour))
+            elif start <= r_date <= end:
+                occupied.add((r_date, r_hour))
+
+    total_slots = len(days) * len(hours)
+    occupancy_rate = round((len(occupied) / total_slots) * 100) if total_slots else 0
+
+    return {
+        "days": days,
+        "hours": hours,
+        "occupied": occupied,
+        "occupancy_rate": occupancy_rate,
+    }
 
 
 @main_bp.route("/manifest.webmanifest")
@@ -23,9 +58,37 @@ def service_worker():
 
 
 @main_bp.route("/")
-@login_required
 def index():
+    if not current_user.is_authenticated:
+        return public_landing()
     return admin_dashboard() if current_user.role == "admin" else employee_dashboard()
+
+
+def public_landing():
+    start_str = request.args.get("start")
+    selected_field_id = request.args.get("field", type=int)
+    start = week_start_for(datetime.strptime(start_str, "%Y-%m-%d").date()) if start_str else week_start_for(date.today())
+
+    fields = Field.query.filter_by(is_active=True).order_by(Field.name.asc()).all()
+    if not selected_field_id and fields:
+        selected_field_id = fields[0].id
+    selected_field = next((f for f in fields if f.id == selected_field_id), None)
+
+    occupancy = _public_occupancy(start, selected_field)
+
+    return render_template(
+        "main/public_landing.html",
+        week_start=start,
+        week_end=start + timedelta(days=6),
+        weekday_names_tr=WEEKDAY_NAMES_TR,
+        hour_label=hour_label,
+        fields=fields,
+        selected_field=selected_field_id,
+        selected_field_obj=selected_field,
+        prev_week=start - timedelta(days=7),
+        next_week=start + timedelta(days=7),
+        **occupancy,
+    )
 
 
 @main_bp.route("/admin-dashboard")

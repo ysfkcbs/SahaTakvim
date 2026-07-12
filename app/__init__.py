@@ -69,6 +69,7 @@ def register_blueprints(app):
     from .fields.routes import fields_bp
     from .finance.routes import finance_bp
     from .main.routes import main_bp
+    from .partners.routes import partners_bp
     from .reports.routes import reports_bp
 
     # Import calendar module defensively to avoid environment-specific symbol import issues.
@@ -83,6 +84,7 @@ def register_blueprints(app):
     app.register_blueprint(calendar_bp, url_prefix="/calendar")
     app.register_blueprint(fields_bp, url_prefix="/fields")
     app.register_blueprint(finance_bp, url_prefix="/finance")
+    app.register_blueprint(partners_bp, url_prefix="/partners")
     app.register_blueprint(reports_bp, url_prefix="/reports")
 
 
@@ -100,7 +102,7 @@ def register_cli_commands(app):
     from werkzeug.security import generate_password_hash
 
     from .extensions import db
-    from .models import Field, Setting, User
+    from .models import ExpenseCategory, Field, IncomeCategory, Setting, User
 
     @app.cli.command("seed-admin")
     def seed_admin():
@@ -121,6 +123,17 @@ def register_cli_commands(app):
                     Setting(key="currency", value="TRY"),
                     Setting(key="default_open_hour", value="19"),
                     Setting(key="default_close_hour", value="2"),
+                ]
+            )
+
+        if IncomeCategory.query.count() == 0:
+            db.session.add_all([IncomeCategory(name=name) for name in ("Kira Geliri", "Turnuva Geliri")])
+
+        if ExpenseCategory.query.count() == 0:
+            db.session.add_all(
+                [
+                    ExpenseCategory(name=name)
+                    for name in ("Kira Gideri", "Kredi Kartı Gideri", "Muhasebe Gideri", "Harici Gider")
                 ]
             )
 

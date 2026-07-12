@@ -8,7 +8,7 @@ from app.extensions import db
 from app.finance.forms import DailyClosingForm, TransactionForm
 from app.finance.services import actual_total, forecast_next_months, reservation_income_for_month
 from app.main.utils import role_required
-from app.models import DailyClosing, Expense, Income
+from app.models import DailyClosing, Expense, ExpenseCategory, Income, IncomeCategory
 
 
 finance_bp = Blueprint("finance", __name__)
@@ -18,6 +18,15 @@ def _flash_form_errors(form):
     for field, errors in form.errors.items():
         for error in errors:
             flash(f"{getattr(form, field).label.text}: {error}", "danger")
+
+
+def _set_category_choices(form):
+    form.income_category_id.choices = [(0, "Kategori seçin")] + [
+        (c.id, c.name) for c in IncomeCategory.query.order_by(IncomeCategory.name.asc()).all()
+    ]
+    form.expense_category_id.choices = [(0, "Kategori seçin")] + [
+        (c.id, c.name) for c in ExpenseCategory.query.order_by(ExpenseCategory.name.asc()).all()
+    ]
 
 
 def _build_transaction_rows():
@@ -32,6 +41,7 @@ def _build_transaction_rows():
                 "amount": record.amount,
                 "date": record.date,
                 "description": record.description,
+                "category": record.category.name if record.category else None,
                 "is_recurring": record.is_recurring,
                 "is_paid": record.is_paid,
                 "edit_url": url_for("finance.edit_income", record_id=record.id),
@@ -49,6 +59,7 @@ def _build_transaction_rows():
                 "amount": record.amount,
                 "date": record.date,
                 "description": record.description,
+                "category": record.category.name if record.category else None,
                 "is_recurring": record.is_recurring,
                 "is_paid": record.is_paid,
                 "edit_url": url_for("finance.edit_expense", record_id=record.id),
@@ -173,16 +184,19 @@ def edit_income(record_id):
         title=record.title,
         amount=record.amount,
         date=record.date,
+        income_category_id=record.category_id or 0,
         description=record.description,
         is_recurring=record.is_recurring,
         is_paid=record.is_paid,
         recurrence=record.recurrence,
     )
+    _set_category_choices(form)
 
     if form.validate_on_submit():
         record.title = form.title.data
         record.amount = form.amount.data
         record.date = form.date.data
+        record.category_id = form.income_category_id.data or None
         record.description = form.description.data
         record.is_recurring = form.is_recurring.data
         record.is_paid = form.is_paid.data
@@ -206,16 +220,19 @@ def edit_expense(record_id):
         title=record.title,
         amount=record.amount,
         date=record.date,
+        expense_category_id=record.category_id or 0,
         description=record.description,
         is_recurring=record.is_recurring,
         is_paid=record.is_paid,
         recurrence=record.recurrence,
     )
+    _set_category_choices(form)
 
     if form.validate_on_submit():
         record.title = form.title.data
         record.amount = form.amount.data
         record.date = form.date.data
+        record.category_id = form.expense_category_id.data or None
         record.description = form.description.data
         record.is_recurring = form.is_recurring.data
         record.is_paid = form.is_paid.data
@@ -256,12 +273,16 @@ def delete_expense(record_id):
 @role_required("admin")
 def forecast():
     form = TransactionForm()
+    _set_category_choices(form)
     if form.validate_on_submit():
-        model = Income if form.transaction_kind.data == "income" else Expense
+        is_income = form.transaction_kind.data == "income"
+        model = Income if is_income else Expense
+        category_id = (form.income_category_id.data if is_income else form.expense_category_id.data) or None
         record = model(
             title=form.title.data,
             amount=form.amount.data,
             date=form.date.data,
+            category_id=category_id,
             description=form.description.data,
             is_recurring=form.is_recurring.data,
             is_paid=form.is_paid.data,

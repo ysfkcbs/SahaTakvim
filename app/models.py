@@ -124,3 +124,16 @@ class Setting(TimestampMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(100), unique=True, nullable=False)
     value = db.Column(db.String(255), nullable=False)
+
+
+PARTNER_NAMES = ["Yusuf", "Fatih"]
+
+
+class PartnerShare(TimestampMixin, db.Model):
+    __table_args__ = (UniqueConstraint("year", "month", "partner_name", name="uq_partner_share_period"),)
+
+    id = db.Column(db.Integer, primary_key=True)
+    year = db.Column(db.Integer, nullable=False)
+    month = db.Column(db.Integer, nullable=False)
+    partner_name = db.Column(db.String(80), nullable=False)
+    amount = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0"))

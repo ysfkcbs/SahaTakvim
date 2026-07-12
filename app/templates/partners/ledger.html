@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="daily-ledger-page">
+  <header class="daily-ledger-header">
+    <div>
+      <h2>Ortaklık Gelir Dağılımı</h2>
+      <p>{{ selected_year }} yılı ortaklık payları</p>
+    </div>
+    <div class="daily-ledger-actions">
+      <a class="daily-ledger-period-btn" href="{{ url_for('partners.ledger', year=prev_year) }}">Önceki Yıl</a>
+      <a class="daily-ledger-period-btn" href="{{ url_for('partners.ledger', year=next_year) }}">Sonraki Yıl</a>
+      <button
+        type="button"
+        class="daily-ledger-new-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#partnerShareModal"
+        data-year="{{ selected_year }}">
+        Yeni Pay Girişi
+      </button>
+    </div>
+  </header>
+
+  <section class="daily-ledger-table-panel">
+    <div class="daily-ledger-table-wrap">
+      <table class="daily-ledger-table">
+        <thead>
+          <tr>
+            <th>Ay</th>
+            {% for name in partner_names %}<th>{{ name }}</th>{% endfor %}
+            <th>Toplam</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in month_rows %}
+            <tr>
+              <td>{{ row.label }}</td>
+              {% for name in partner_names %}
+                <td>
+                  <button
+                    type="button"
+                    class="daily-ledger-edit-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#partnerShareModal"
+                    data-year="{{ selected_year }}"
+                    data-month="{{ row.month }}"
+                    data-partner="{{ name }}"
+                    data-amount="{{ '%.2f'|format((row.amounts[name])|float) }}">
+                    ₺{{ '%.2f'|format((row.amounts[name])|float) }}
+                  </button>
+                </td>
+              {% endfor %}
+              <td><strong>₺{{ '%.2f'|format((row.total)|float) }}</strong></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td><strong>Yıllık Toplam</strong></td>
+            {% for name in partner_names %}<td><strong>₺{{ '%.2f'|format((yearly_totals[name])|float) }}</strong></td>{% endfor %}
+            <td><strong>₺{{ '%.2f'|format((yearly_grand_total)|float) }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+</section>
+
+<div class="modal fade" id="partnerShareModal" tabindex="-1" aria-labelledby="partnerShareModalTitle">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="partnerShareModalTitle">Ortaklık Payı Girişi</h5>
+        <button class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+
+      <form method="post" action="{{ url_for('partners.ledger') }}">
+        <div class="modal-body">
+          {{ form.hidden_tag() }}
+          <div class="row g-2">
+            <div class="col-6">
+              {{ form.year.label(class='form-label') }}
+              {{ form.year(class='form-control form-control-lg', id='partner_share_year_input') }}
+            </div>
+            <div class="col-6">
+              {{ form.month.label(class='form-label') }}
+              {{ form.month(class='form-select form-select-lg', id='partner_share_month_input') }}
+            </div>
+          </div>
+          <div class="mt-3">
+            {{ form.partner_name.label(class='form-label') }}
+            {{ form.partner_name(class='form-select form-select-lg', id='partner_share_partner_input') }}
+          </div>
+          <div class="mt-3">
+            {{ form.amount.label(class='form-label') }}
+            {{ form.amount(class='form-control form-control-lg', id='partner_share_amount_input', inputmode='decimal') }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          {{ form.submit(class='btn btn-primary btn-lg w-100') }}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

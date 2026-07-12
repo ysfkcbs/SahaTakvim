@@ -37,12 +37,15 @@
           {% if current_user.role == 'admin' %}
           <a class="nav-link" href="{{ url_for('fields.list_fields') }}">Sahalar</a>
           <a class="nav-link" href="{{ url_for('finance.forecast') }}">Bilanço</a>
+          <a class="nav-link" href="{{ url_for('partners.ledger') }}">Ortaklık</a>
           <a class="nav-link" href="{{ url_for('reports.reservation_report') }}">Raporlar</a>
           <a class="nav-link" href="{{ url_for('auth.users') }}">Kullanıcılar</a>
           {% endif %}
           <a class="btn btn-outline-light btn-sm app-logout-btn" href="{{ url_for('auth.logout') }}">Çıkış</a>
         </div>
       </div>
+      {% else %}
+      <a class="btn btn-outline-light btn-sm ms-auto" href="{{ url_for('auth.login') }}">Giriş Yap</a>
       {% endif %}
     </div>
   </nav>

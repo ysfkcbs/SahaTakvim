@@ -31,6 +31,8 @@
       <div class="col-md-2">{{ form.amount.label(class='form-label') }}{{ form.amount(class='form-control form-control-lg') }}</div>
       <div class="col-md-2">{{ form.date.label(class='form-label') }}{{ form.date(class='form-control form-control-lg') }}</div>
       <div class="col-md-2">{{ form.recurrence.label(class='form-label') }}{{ form.recurrence(class='form-select form-select-lg') }}</div>
+      <div class="col-md-6">{{ form.income_category_id.label(class='form-label') }}{{ form.income_category_id(class='form-select form-select-lg') }}</div>
+      <div class="col-md-6">{{ form.expense_category_id.label(class='form-label') }}{{ form.expense_category_id(class='form-select form-select-lg') }}</div>
       <div class="col-12">{{ form.description.label(class='form-label') }}{{ form.description(class='form-control', rows='3') }}</div>
       <div class="col-md-6 form-check">{{ form.is_recurring(class='form-check-input') }} {{ form.is_recurring.label(class='form-check-label') }}</div>
       <div class="col-md-6 form-check">{{ form.is_paid(class='form-check-input') }} {{ form.is_paid.label(class='form-check-label') }}</div>
@@ -42,12 +44,13 @@
 <div class="card mt-3">
   <div class="card-body p-0 p-md-3">
     <table class="table table-striped mobile-stack-table finance-record-table mb-0">
-      <thead><tr><th>Tarih</th><th>Başlık</th><th>Açıklama</th><th>İşlem Türü</th><th>Tutar</th><th>Tip</th><th>Ödeme Durumu</th><th>İşlem</th></tr></thead>
+      <thead><tr><th>Tarih</th><th>Başlık</th><th>Kategori</th><th>Açıklama</th><th>İşlem Türü</th><th>Tutar</th><th>Tip</th><th>Ödeme Durumu</th><th>İşlem</th></tr></thead>
       <tbody>
       {% for r in records %}
       <tr>
         <td data-label="Tarih">{{ r.date }}</td>
         <td data-label="Başlık"><div class="finance-record-main"><strong>{{ r.title }}</strong></div></td>
+        <td data-label="Kategori">{{ r.category if r.category else '-' }}</td>
         <td data-label="Açıklama"><span class="finance-description-cell">{{ r.description if r.description else '-' }}</span></td>
         <td data-label="İşlem Türü"><span class="finance-kind-pill {{ 'is-income' if r.kind == 'income' else 'is-expense' }}">{{ r.kind_label }}</span></td>
         <td data-label="Tutar"><strong class="finance-amount">₺{{ r.amount }}</strong></td>

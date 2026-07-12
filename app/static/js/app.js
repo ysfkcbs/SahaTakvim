@@ -172,4 +172,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     syncClosingTotal();
   }
+
+  const partnerModal = document.getElementById('partnerShareModal');
+  if (partnerModal) {
+    partnerModal.addEventListener('show.bs.modal', event => {
+      const trigger = event.relatedTarget;
+      const yearInput = document.getElementById('partner_share_year_input');
+      const monthInput = document.getElementById('partner_share_month_input');
+      const partnerInput = document.getElementById('partner_share_partner_input');
+      const amountInput = document.getElementById('partner_share_amount_input');
+
+      if (yearInput) yearInput.value = trigger?.dataset?.year || yearInput.value;
+      if (monthInput && trigger?.dataset?.month) monthInput.value = trigger.dataset.month;
+      if (partnerInput && trigger?.dataset?.partner) partnerInput.value = trigger.dataset.partner;
+      if (amountInput) amountInput.value = trigger?.dataset?.amount || '';
+    });
+  }
 });
