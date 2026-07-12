@@ -77,12 +77,12 @@ class DailyClosingForm(FlaskForm):
 
 
 class TransactionForm(FlaskForm):
-    transaction_kind = SelectField("Kategori", choices=[("income", "Gelir"), ("expense", "Gider")], validators=[DataRequired()])
+    transaction_kind = SelectField("İşlem Türü", choices=[("income", "Gelir"), ("expense", "Gider")], validators=[DataRequired()])
     title = StringField("Başlık", validators=[DataRequired()])
     amount = DecimalField("Tutar", validators=[DataRequired(), NumberRange(min=0)], filters=[normalize_decimal_input])
     date = DateField("Tarih", validators=[DataRequired()], default=date.today)
-    income_category_id = SelectField("Gelir Kategorisi", coerce=int, validators=[Optional()])
-    expense_category_id = SelectField("Gider Kategorisi", coerce=int, validators=[Optional()])
+    income_category_id = SelectField("Kategori", coerce=int, validators=[Optional()])
+    expense_category_id = SelectField("Kategori", coerce=int, validators=[Optional()])
     description = TextAreaField("Açıklama", validators=[Optional()])
     is_recurring = BooleanField("Sabit (Tekrarlayan)")
     is_paid = BooleanField("Ödendi")

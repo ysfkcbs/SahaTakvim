@@ -31,8 +31,8 @@
       <div class="col-md-2">{{ form.amount.label(class='form-label') }}{{ form.amount(class='form-control form-control-lg') }}</div>
       <div class="col-md-2">{{ form.date.label(class='form-label') }}{{ form.date(class='form-control form-control-lg') }}</div>
       <div class="col-md-2">{{ form.recurrence.label(class='form-label') }}{{ form.recurrence(class='form-select form-select-lg') }}</div>
-      <div class="col-md-6">{{ form.income_category_id.label(class='form-label') }}{{ form.income_category_id(class='form-select form-select-lg') }}</div>
-      <div class="col-md-6">{{ form.expense_category_id.label(class='form-label') }}{{ form.expense_category_id(class='form-select form-select-lg') }}</div>
+      <div class="col-md-6" id="income_category_wrap">{{ form.income_category_id.label(class='form-label') }}{{ form.income_category_id(class='form-select form-select-lg') }}</div>
+      <div class="col-md-6" id="expense_category_wrap">{{ form.expense_category_id.label(class='form-label') }}{{ form.expense_category_id(class='form-select form-select-lg') }}</div>
       <div class="col-12">{{ form.description.label(class='form-label') }}{{ form.description(class='form-control', rows='3') }}</div>
       <div class="col-md-6 form-check">{{ form.is_recurring(class='form-check-input') }} {{ form.is_recurring.label(class='form-check-label') }}</div>
       <div class="col-md-6 form-check">{{ form.is_paid(class='form-check-input') }} {{ form.is_paid.label(class='form-check-label') }}</div>

@@ -173,6 +173,22 @@ document.addEventListener('DOMContentLoaded', () => {
     syncClosingTotal();
   }
 
+  const transactionKindSelect = document.getElementById('transaction_kind');
+  const incomeCategoryWrap = document.getElementById('income_category_wrap');
+  const expenseCategoryWrap = document.getElementById('expense_category_wrap');
+
+  const syncCategoryVisibility = () => {
+    if (!transactionKindSelect) return;
+    const isIncome = transactionKindSelect.value === 'income';
+    if (incomeCategoryWrap) incomeCategoryWrap.classList.toggle('d-none', !isIncome);
+    if (expenseCategoryWrap) expenseCategoryWrap.classList.toggle('d-none', isIncome);
+  };
+
+  if (transactionKindSelect) {
+    transactionKindSelect.addEventListener('change', syncCategoryVisibility);
+    syncCategoryVisibility();
+  }
+
   const partnerModal = document.getElementById('partnerShareModal');
   if (partnerModal) {
     partnerModal.addEventListener('show.bs.modal', event => {
