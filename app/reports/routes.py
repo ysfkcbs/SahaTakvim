@@ -49,6 +49,7 @@ def reservation_report():
     )
     single_count = month_query.filter_by(reservation_type="tek_saatlik").count()
     subscriber_count = month_query.filter_by(reservation_type="abone").count()
+    tournament_count = month_query.filter_by(reservation_type="turnuva").count()
 
     income = (
         reservation_income_for_month(selected_year, selected_month)
@@ -58,9 +59,10 @@ def reservation_report():
     expense = actual_total(Expense, selected_year, selected_month)
 
     summary = {
-        "total_count": single_count + subscriber_count,
+        "total_count": single_count + subscriber_count + tournament_count,
         "single_count": single_count,
         "subscriber_count": subscriber_count,
+        "tournament_count": tournament_count,
         "income": income,
         "expense": expense,
         "net": income - expense,

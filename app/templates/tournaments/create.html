@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header page-header-stack mb-3">
+  <div>
+    <h3 class="page-title mb-0">Turnuva Oluştur</h3>
+    <p class="page-subtitle">Gün/saat kombinasyonlarını seçin — çakışan slotlar otomatik atlanır ve özet gösterilir.</p>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('tournaments.list_tournaments') }}">Turnuvalar</a>
+</div>
+
+<div class="card card-body">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="row g-2">
+      <div class="col-md-4">{{ form.field_id.label(class='form-label') }}{{ form.field_id(class='form-select form-select-lg', onchange='this.form.submit()') }}</div>
+      <div class="col-md-4">{{ form.name.label(class='form-label') }}{{ form.name(class='form-control form-control-lg') }}</div>
+      <div class="col-md-4">{{ form.format.label(class='form-label') }}{{ form.format(class='form-select form-select-lg', id='tournament_format_input') }}</div>
+
+      <div class="col-md-4">{{ form.customer_name.label(class='form-label') }}{{ form.customer_name(class='form-control form-control-lg') }}</div>
+      <div class="col-md-4">{{ form.phone.label(class='form-label') }}{{ form.phone(class='form-control form-control-lg') }}</div>
+      <div class="col-md-4 form-check align-self-center mt-4">{{ form.deposit_paid(class='form-check-input') }} {{ form.deposit_paid.label(class='form-check-label') }}</div>
+
+      <div class="col-md-6">{{ form.start_date.label(class='form-label') }}{{ form.start_date(class='form-control form-control-lg') }}</div>
+      <div class="col-md-6">{{ form.week_count.label(class='form-label') }}{{ form.week_count(class='form-control form-control-lg', id='tournament_week_count_input') }}</div>
+
+      <div class="col-12">{{ form.notes.label(class='form-label') }}{{ form.notes(class='form-control', rows='2') }}</div>
+    </div>
+
+    <hr class="my-3">
+
+    <div id="tournament_lig_grid_wrap">
+      <label class="form-label">Gün / Saat Seçimi <span class="text-muted">(her hafta aynen tekrarlanır)</span></label>
+      <div class="tournament-slot-grid" style="grid-template-columns: max-content repeat({{ hours|length }}, minmax(2.4rem, 1fr));">
+        <div></div>
+        {% for h in hours %}<div class="tournament-slot-grid-hour-head">{{ hour_label(h) }}</div>{% endfor %}
+        {% for wd in range(7) %}
+          <div class="tournament-slot-grid-day-head">{{ weekday_names_tr[wd] }}</div>
+          {% for h in hours %}
+          <label class="tournament-slot-checkbox">
+            <input type="checkbox" name="slot_{{ wd }}_{{ h }}" value="1">
+          </label>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div id="tournament_eleme_grid_wrap" class="d-none">
+      <label class="form-label">Hafta Bazlı Gün / Saat Seçimi <span class="text-muted">(her tur için ayrı ayrı seçin)</span></label>
+      <div class="tournament-week-tabs" role="tablist">
+        {% for w in week_range %}
+        <button type="button" class="tournament-week-tab {{ 'is-active' if w == 0 else '' }}" data-week-tab="{{ w }}">{{ w + 1 }}. Hafta</button>
+        {% endfor %}
+      </div>
+      {% for w in week_range %}
+      <div class="tournament-week-panel {{ 'is-active' if w == 0 else '' }}" data-week-panel="{{ w }}">
+        <div class="tournament-slot-grid" style="grid-template-columns: max-content repeat({{ hours|length }}, minmax(2.4rem, 1fr));">
+          <div></div>
+          {% for h in hours %}<div class="tournament-slot-grid-hour-head">{{ hour_label(h) }}</div>{% endfor %}
+          {% for wd in range(7) %}
+            <div class="tournament-slot-grid-day-head">{{ weekday_names_tr[wd] }}</div>
+            {% for h in hours %}
+            <label class="tournament-slot-checkbox">
+              <input type="checkbox" name="slot_w{{ w }}_{{ wd }}_{{ h }}" value="1">
+            </label>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {{ form.submit(class='btn btn-primary btn-lg w-100 mt-3') }}
+  </form>
+</div>
+{% endblock %}

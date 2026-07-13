@@ -45,12 +45,32 @@ class Field(TimestampMixin, db.Model):
     reservations = db.relationship("Reservation", back_populates="field", lazy="dynamic")
 
 
+TOURNAMENT_FORMATS = [("lig", "Lig Usulü"), ("eleme", "Eleme Usulü")]
+
+
+class Tournament(TimestampMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    field_id = db.Column(db.Integer, db.ForeignKey("field.id"), nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    format = db.Column(db.String(20), nullable=False)  # lig / eleme
+    customer_name = db.Column(db.String(120), nullable=False)
+    phone = db.Column(db.String(30), nullable=True)
+    deposit_paid = db.Column(db.Boolean, nullable=False, default=False)
+    notes = db.Column(db.Text)
+    status = db.Column(db.String(20), nullable=False, default="active")
+    created_by_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+
+    field = db.relationship("Field")
+    created_by = db.relationship("User")
+    reservations = db.relationship("Reservation", back_populates="tournament", lazy="dynamic")
+
+
 class Reservation(TimestampMixin, db.Model):
     __table_args__ = (UniqueConstraint("field_id", "reservation_date", "reservation_hour", name="uq_slot"),)
 
     id = db.Column(db.Integer, primary_key=True)
     field_id = db.Column(db.Integer, db.ForeignKey("field.id"), nullable=False)
-    reservation_type = db.Column(db.String(20), nullable=False)  # abone / tek_saatlik
+    reservation_type = db.Column(db.String(20), nullable=False)  # abone / tek_saatlik / turnuva
     customer_name = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(30), nullable=True)
     deposit_paid = db.Column(db.Boolean, nullable=False, default=False)
@@ -59,9 +79,11 @@ class Reservation(TimestampMixin, db.Model):
     notes = db.Column(db.Text)
     status = db.Column(db.String(20), nullable=False, default="active")
     created_by_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    tournament_id = db.Column(db.Integer, db.ForeignKey("tournament.id"), nullable=True)
 
     field = db.relationship("Field", back_populates="reservations")
     created_by = db.relationship("User", back_populates="reservations")
+    tournament = db.relationship("Tournament", back_populates="reservations")
 
     @property
     def display_time(self):

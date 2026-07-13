@@ -71,6 +71,7 @@ def register_blueprints(app):
     from .main.routes import main_bp
     from .partners.routes import partners_bp
     from .reports.routes import reports_bp
+    from .tournaments.routes import tournaments_bp
 
     # Import calendar module defensively to avoid environment-specific symbol import issues.
     from .calendar import routes as calendar_routes
@@ -86,6 +87,7 @@ def register_blueprints(app):
     app.register_blueprint(finance_bp, url_prefix="/finance")
     app.register_blueprint(partners_bp, url_prefix="/partners")
     app.register_blueprint(reports_bp, url_prefix="/reports")
+    app.register_blueprint(tournaments_bp, url_prefix="/tournaments")
 
 
 def register_shell_context(app):

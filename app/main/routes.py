@@ -4,14 +4,12 @@ from flask import Blueprint, current_app, render_template, request, send_from_di
 from flask_login import current_user, login_required
 from sqlalchemy import case, extract, func
 
-from app.calendar.utils import business_hours, hour_label, week_start_for
+from app.calendar.utils import WEEKDAY_NAMES_TR, business_hours, hour_label, week_start_for
 from app.finance.services import daily_closing_total_for_month
 from app.models import DailyClosing, Expense, Field, Income, Reservation
 
 
 main_bp = Blueprint("main", __name__)
-
-WEEKDAY_NAMES_TR = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
 
 
 def _public_occupancy(start, field):

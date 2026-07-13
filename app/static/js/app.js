@@ -107,6 +107,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const tournamentFormatSelect = document.getElementById('tournament_format_input');
+  const tournamentLigGridWrap = document.getElementById('tournament_lig_grid_wrap');
+  const tournamentElemeGridWrap = document.getElementById('tournament_eleme_grid_wrap');
+
+  const syncTournamentFormat = () => {
+    if (!tournamentFormatSelect) return;
+    const isElimination = tournamentFormatSelect.value === 'eleme';
+    if (tournamentLigGridWrap) tournamentLigGridWrap.classList.toggle('d-none', isElimination);
+    if (tournamentElemeGridWrap) tournamentElemeGridWrap.classList.toggle('d-none', !isElimination);
+  };
+
+  if (tournamentFormatSelect) {
+    tournamentFormatSelect.addEventListener('change', syncTournamentFormat);
+    syncTournamentFormat();
+  }
+
+  const weekCountInput = document.getElementById('tournament_week_count_input');
+  const weekTabs = Array.from(document.querySelectorAll('[data-week-tab]'));
+  const weekPanels = Array.from(document.querySelectorAll('[data-week-panel]'));
+
+  if (weekCountInput && weekTabs.length && weekPanels.length) {
+    const activateWeek = index => {
+      weekTabs.forEach(tab => {
+        const isActive = tab.dataset.weekTab === String(index);
+        tab.classList.toggle('is-active', isActive);
+      });
+      weekPanels.forEach(panel => {
+        panel.classList.toggle('is-active', panel.dataset.weekPanel === String(index));
+      });
+    };
+
+    const syncWeekCount = () => {
+      const weekCount = Math.max(1, parseInt(weekCountInput.value, 10) || 1);
+      let activeIsVisible = false;
+      weekTabs.forEach(tab => {
+        const visible = Number(tab.dataset.weekTab) < weekCount;
+        tab.classList.toggle('d-none', !visible);
+        if (visible && tab.classList.contains('is-active')) activeIsVisible = true;
+      });
+      weekPanels.forEach(panel => {
+        panel.classList.toggle('d-none', Number(panel.dataset.weekPanel) >= weekCount);
+      });
+      if (!activeIsVisible) activateWeek(0);
+    };
+
+    weekTabs.forEach(tab => {
+      tab.addEventListener('click', () => activateWeek(tab.dataset.weekTab));
+    });
+    weekCountInput.addEventListener('input', syncWeekCount);
+    syncWeekCount();
+  }
+
   document.querySelectorAll('.slot-edit-icon, .mobile-slot-edit').forEach(link => {
     link.addEventListener('click', event => {
       event.stopPropagation();

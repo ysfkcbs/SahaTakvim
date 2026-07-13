@@ -153,6 +153,11 @@ body.is-standalone .app-navbar {
   background: rgba(253, 126, 20, 0.16);
 }
 
+.dashboard-status-badge.is-tournament {
+  color: #1a4fa0;
+  background: rgba(47, 111, 214, 0.16);
+}
+
 .dashboard-status-badge.is-paid {
   color: #11653d;
   background: rgba(25, 135, 84, 0.14);
@@ -818,6 +823,70 @@ body.is-standalone .app-navbar {
 
 .mobile-day-panel.is-active {
   display: block;
+}
+
+.tournament-week-tabs {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+  scrollbar-width: none;
+}
+
+.tournament-week-tab {
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(13, 110, 253, 0.2);
+  background: #fff;
+  color: var(--app-text-soft);
+  white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.tournament-week-tab.is-active {
+  background: linear-gradient(180deg, rgba(13, 110, 253, 0.14), rgba(13, 110, 253, 0.04));
+  color: var(--app-primary-strong);
+  border-color: rgba(13, 110, 253, 0.3);
+}
+
+.tournament-week-panel {
+  display: none;
+}
+
+.tournament-week-panel.is-active {
+  display: block;
+}
+
+.tournament-slot-grid {
+  display: grid;
+  gap: 0.3rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  overflow-x: auto;
+}
+
+.tournament-slot-grid-hour-head,
+.tournament-slot-grid-day-head {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--app-text-soft);
+}
+
+.tournament-slot-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  margin: 0;
+}
+
+.tournament-slot-checkbox input {
+  margin: 0;
 }
 
 .mobile-day-card .card-body {
@@ -2173,6 +2242,14 @@ button.saha-calendar-slot {
 
 .saha-calendar-slot.is-occupied {
   background: linear-gradient(180deg, #f5a25e 0%, #e67825 100%);
+}
+
+.saha-calendar-slot.is-tournament {
+  background: linear-gradient(180deg, #6fa8f5 0%, #2f6fd6 100%);
+}
+
+.saha-calendar-slot.is-locked {
+  cursor: not-allowed;
 }
 
 .saha-calendar-slot.is-empty {

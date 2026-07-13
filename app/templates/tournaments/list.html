@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header page-header-stack mb-3">
+  <div>
+    <h3 class="page-title mb-0">Turnuvalar</h3>
+    <p class="page-subtitle">Oluşturulan tüm turnuvaları ve durumlarını görüntüleyin.</p>
+  </div>
+  <a class="btn btn-primary btn-lg" href="{{ url_for('tournaments.create') }}">Yeni Turnuva</a>
+</div>
+
+<div class="card">
+  <div class="card-body p-0 p-md-3">
+    <table class="table table-striped mobile-stack-table mb-0">
+      <thead><tr><th>Ad</th><th>Saha</th><th>Format</th><th>Organizatör</th><th>Durum</th><th></th></tr></thead>
+      <tbody>
+      {% for t in tournaments %}
+      <tr>
+        <td data-label="Ad">{{ t.name }}</td>
+        <td data-label="Saha">{{ t.field.name }}</td>
+        <td data-label="Format">{{ 'Lig Usulü' if t.format == 'lig' else 'Eleme Usulü' }}</td>
+        <td data-label="Organizatör">{{ t.customer_name }}</td>
+        <td data-label="Durum"><span class="admin-status-pill {{ 'is-active' if t.status == 'active' else 'is-passive' }}">{{ 'Aktif' if t.status == 'active' else 'İptal' }}</span></td>
+        <td data-label="İşlem"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('tournaments.detail', tournament_id=t.id) }}">Detay</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="dashboard-empty-row">Henüz turnuva oluşturulmadı.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

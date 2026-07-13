@@ -2,72 +2,22 @@ from datetime import date, datetime, timedelta
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
-from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
 from app.calendar.forms import ReservationForm
-from app.calendar.utils import business_hours, hour_label, week_start_for
+from app.calendar.utils import (
+    WEEKDAY_NAMES_TR,
+    business_hours,
+    has_slot_conflict,
+    hour_label,
+    lock_field_hour,
+    week_start_for,
+)
 from app.extensions import db
 from app.models import Field, Reservation
 
 
 calendar_bp = Blueprint("calendar", __name__)
-
-
-def _lock_field_hour(field_id, hour):
-    # Serializes concurrent check-then-insert races (exact slot and recurring
-    # subscription checks alike) for this field+hour; Postgres-only because the
-    # subscription conflict check has no backing unique constraint to fall back on.
-    if db.engine.dialect.name == "postgresql":
-        db.session.execute(text("SELECT pg_advisory_xact_lock(:field_id, :hour)"), {"field_id": field_id, "hour": hour})
-
-
-def _matching_subscription_query(field_id, reservation_date, reservation_hour, exclude_id=None):
-    query = Reservation.query.filter(
-        Reservation.field_id == field_id,
-        Reservation.reservation_hour == reservation_hour,
-        Reservation.reservation_type == "abone",
-        Reservation.status == "active",
-        Reservation.reservation_date <= reservation_date,
-    )
-    if exclude_id:
-        query = query.filter(Reservation.id != exclude_id)
-    return [reservation for reservation in query.all() if reservation.reservation_date.weekday() == reservation_date.weekday()]
-
-
-def _future_slot_conflicts_for_subscription(field_id, reservation_date, reservation_hour, exclude_id=None):
-    query = Reservation.query.filter(
-        Reservation.field_id == field_id,
-        Reservation.reservation_hour == reservation_hour,
-        Reservation.status == "active",
-        Reservation.reservation_date >= reservation_date,
-    )
-    if exclude_id:
-        query = query.filter(Reservation.id != exclude_id)
-    return [reservation for reservation in query.all() if reservation.reservation_date.weekday() == reservation_date.weekday()]
-
-
-def _has_slot_conflict(field_id, reservation_date, reservation_hour, reservation_type, exclude_id=None):
-    exact_query = Reservation.query.filter_by(
-        field_id=field_id,
-        reservation_date=reservation_date,
-        reservation_hour=reservation_hour,
-        status="active",
-    )
-    if exclude_id:
-        exact_query = exact_query.filter(Reservation.id != exclude_id)
-    if exact_query.first():
-        return True
-
-    if _matching_subscription_query(field_id, reservation_date, reservation_hour, exclude_id):
-        return True
-
-    if reservation_type == "abone":
-        return bool(_future_slot_conflicts_for_subscription(field_id, reservation_date, reservation_hour, exclude_id))
-
-    return False
-
-WEEKDAY_NAMES_TR = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"]
 
 
 @calendar_bp.route("/weekly")
@@ -176,8 +126,8 @@ def create_reservation():
             form.customer_name.data,
             request.headers.get("User-Agent", "")[:180],
         )
-        _lock_field_hour(form.field_id.data, form.reservation_hour.data)
-        if _has_slot_conflict(
+        lock_field_hour(form.field_id.data, form.reservation_hour.data)
+        if has_slot_conflict(
             form.field_id.data,
             form.reservation_date.data,
             form.reservation_hour.data,
@@ -249,6 +199,9 @@ def create_reservation():
 @login_required
 def edit_reservation(reservation_id):
     reservation = Reservation.query.get_or_404(reservation_id)
+    if reservation.reservation_type == "turnuva":
+        flash("Turnuva rezervasyonları sadece Turnuva Yönetimi ekranından yönetilebilir.", "danger")
+        return redirect(url_for("calendar.weekly", start=reservation.reservation_date.isoformat(), field=reservation.field_id))
     form = ReservationForm(obj=reservation)
     fields = Field.query.filter_by(is_active=True).order_by(Field.name.asc()).all()
     form.field_id.choices = [(f.id, f.name) for f in fields]
@@ -262,8 +215,8 @@ def edit_reservation(reservation_id):
     ]
 
     if form.validate_on_submit():
-        _lock_field_hour(form.field_id.data, form.reservation_hour.data)
-        conflict = _has_slot_conflict(
+        lock_field_hour(form.field_id.data, form.reservation_hour.data)
+        conflict = has_slot_conflict(
             form.field_id.data,
             form.reservation_date.data,
             form.reservation_hour.data,
@@ -290,6 +243,9 @@ def edit_reservation(reservation_id):
 @login_required
 def delete_reservation(reservation_id):
     reservation = Reservation.query.get_or_404(reservation_id)
+    if reservation.reservation_type == "turnuva":
+        flash("Turnuva rezervasyonları sadece Turnuva Yönetimi ekranından yönetilebilir.", "danger")
+        return redirect(url_for("calendar.weekly", start=reservation.reservation_date.isoformat(), field=reservation.field_id))
     reservation.status = "cancelled"
     db.session.commit()
     flash("Rezervasyon iptal edildi.", "warning")

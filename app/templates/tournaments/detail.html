@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header page-header-stack mb-3">
+  <div>
+    <h3 class="page-title mb-0">{{ tournament.name }}</h3>
+    <p class="page-subtitle">{{ tournament.field.name }} · {{ 'Lig Usulü' if tournament.format == 'lig' else 'Eleme Usulü' }} · {{ tournament.customer_name }}</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-outline-secondary" href="{{ url_for('tournaments.list_tournaments') }}">Turnuvalar</a>
+    {% if tournament.status == 'active' %}
+    <form method="post" action="{{ url_for('tournaments.cancel', tournament_id=tournament.id) }}" onsubmit="return confirm('Turnuvayı ve bağlı tüm slotları iptal etmek istediğinize emin misiniz?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button class="btn btn-outline-danger">Turnuvayı İptal Et</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><small>Durum</small><h4>{{ 'Aktif' if tournament.status == 'active' else 'İptal' }}</h4></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><small>Toplam Slot</small><h4>{{ slots|length }}</h4></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><small>Telefon</small><h4>{{ tournament.phone or '-' }}</h4></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat-card"><div class="card-body"><small>Kapora</small><h4>{{ 'Alındı' if tournament.deposit_paid else 'Alınmadı' }}</h4></div></div></div>
+</div>
+
+{% if tournament.notes %}
+<div class="card card-body mb-3"><strong>Not:</strong> {{ tournament.notes }}</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-body p-0 p-md-3">
+    <table class="table table-striped mobile-stack-table mb-0">
+      <thead><tr><th>Tarih</th><th>Saat</th><th>Durum</th></tr></thead>
+      <tbody>
+      {% for s in slots %}
+      <tr>
+        <td data-label="Tarih">{{ s.reservation_date.strftime('%d.%m.%Y') }}</td>
+        <td data-label="Saat">{{ hour_label(s.reservation_hour) }}</td>
+        <td data-label="Durum">{{ 'Aktif' if s.status == 'active' else 'İptal' if s.status == 'cancelled' else s.status }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" class="dashboard-empty-row">Slot yok.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

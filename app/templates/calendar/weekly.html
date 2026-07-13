@@ -37,7 +37,25 @@
         {% for d in days %}
           {% set r = slot_map.get((d, h)) %}
           {% set display_hour = '24:00' if h == 0 else hour_label(h) %}
-          {% if r %}
+          {% if r and r.reservation_type == 'turnuva' and current_user.role != 'admin' %}
+            <div
+              class="saha-calendar-slot is-booked is-tournament is-locked"
+              aria-label="{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }} {{ display_hour }} {{ r.customer_name }}"
+              title="Turnuva - Bu işlem için yönetici izni gerekir">
+              <span class="saha-calendar-slot-time">{{ display_hour }}</span>
+              <span class="saha-calendar-slot-name">{{ r.customer_name }}</span>
+            </div>
+          {% elif r and r.reservation_type == 'turnuva' %}
+            <a
+              href="{{ url_for('tournaments.detail', tournament_id=r.tournament_id) }}"
+              class="saha-calendar-slot is-booked is-tournament"
+              aria-label="{{ weekday_names_tr[d.weekday()] }} {{ d.strftime('%d.%m') }} {{ display_hour }} {{ r.customer_name }}"
+              title="{{ r.customer_name }} - Turnuva{{ ' - Kapora alındı' if r.deposit_paid else '' }}">
+              {% if r.deposit_paid %}<span class="saha-calendar-slot-deposit" aria-hidden="true">💰</span>{% endif %}
+              <span class="saha-calendar-slot-time">{{ display_hour }}</span>
+              <span class="saha-calendar-slot-name">{{ r.customer_name }}</span>
+            </a>
+          {% elif r %}
             <a
               href="{{ url_for('calendar.edit_reservation', reservation_id=r.id) }}"
               class="saha-calendar-slot is-booked {% if r.reservation_type == 'abone' %}is-subscriber{% else %}is-match{% endif %}"

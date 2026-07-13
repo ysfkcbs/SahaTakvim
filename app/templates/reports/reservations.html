@@ -15,6 +15,7 @@
   <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Toplam Maç</small><h4>{{ summary.total_count }}</h4></div></div></div>
   <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Tek Saatlik</small><h4>{{ summary.single_count }}</h4></div></div></div>
   <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Abone</small><h4>{{ summary.subscriber_count }}</h4></div></div></div>
+  <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Turnuva</small><h4>{{ summary.tournament_count }}</h4></div></div></div>
   <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Toplam Gelir</small><h4>₺{{ '%.0f'|format(summary.income|float) }}</h4></div></div></div>
   <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Toplam Gider</small><h4>₺{{ '%.0f'|format(summary.expense|float) }}</h4></div></div></div>
   <div class="col-6 col-lg-2"><div class="card stat-card"><div class="card-body"><small>Net Kazanç</small><h4>₺{{ '%.0f'|format(summary.net|float) }}</h4></div></div></div>
@@ -31,7 +32,7 @@
         <td data-label="Saat">{{'%02d:00'|format(r.reservation_hour)}}</td>
         <td data-label="Saha">{{r.field.name}}</td>
         <td data-label="Kişi">{{r.customer_name}}</td>
-        <td data-label="Tür">{{r.reservation_type}}</td>
+        <td data-label="Tür">{{ 'Abone' if r.reservation_type == 'abone' else 'Turnuva' if r.reservation_type == 'turnuva' else 'Tek Saatlik' }}</td>
         <td data-label="Kapora">{{ 'Alındı' if r.deposit_paid else 'Alınmadı' }}</td>
         <td data-label="Durum">
           {{ 'Aktif' if r.status == 'active' else 'İptal' if r.status == 'cancelled' else 'Tamamlandı' if r.status == 'completed' else r.status }}

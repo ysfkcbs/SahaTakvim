@@ -27,7 +27,7 @@
             <td data-label="Tarih">{{r.reservation_date}}</td>
             <td data-label="Saat">{{'%02d:00'|format(r.reservation_hour)}}</td>
             <td data-label="Ad">{{r.customer_name}}</td>
-            <td data-label="Tür"><span class="dashboard-status-badge {{ 'is-subscriber' if r.reservation_type == 'abone' else 'is-match' }}">{{ 'Abone' if r.reservation_type == 'abone' else 'Tek Saatlik' }}</span></td>
+            <td data-label="Tür"><span class="dashboard-status-badge {{ 'is-subscriber' if r.reservation_type == 'abone' else 'is-tournament' if r.reservation_type == 'turnuva' else 'is-match' }}">{{ 'Abone' if r.reservation_type == 'abone' else 'Turnuva' if r.reservation_type == 'turnuva' else 'Tek Saatlik' }}</span></td>
             <td data-label="Kapora"><span class="dashboard-status-badge {{ 'is-paid' if r.deposit_paid else 'is-pending' }}">{{ 'Alındı' if r.deposit_paid else 'Bekliyor' }}</span></td>
           </tr>
           {% else %}
