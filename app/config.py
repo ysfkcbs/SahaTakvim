@@ -63,6 +63,13 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     REMEMBER_COOKIE_DURATION = timedelta(days=7)
     SQLALCHEMY_DATABASE_URI = build_database_uri()
+    # Silently discard connections that a proxy/NAT (e.g. Docker Desktop's
+    # host.docker.internal path) has dropped while idle, instead of hanging
+    # on a dead socket until gunicorn's worker timeout kills the request.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,
+    }
     SESSION_COOKIE_NAME = "saha_takvim_session"
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
