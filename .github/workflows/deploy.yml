@@ -7,6 +7,12 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      # The runner's LaunchAgent session can't unlock the macOS login
+      # keychain, so Docker Desktop's keychain-backed credential store
+      # can't be used here. Point at a config with no credsStore — fine
+      # since this project only pulls public images.
+      DOCKER_CONFIG: /Users/yusufpc/actions-runner/.docker-config
     steps:
       - name: Pull latest code
         working-directory: /Users/yusufpc/Desktop/Projeler/SahaTakvim
