@@ -1,0 +1,23 @@
+name: Deploy to Mac mini
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Pull latest code
+        working-directory: /Users/yusufpc/Desktop/Projeler/SahaTakvim
+        run: |
+          git fetch origin main
+          git reset --hard origin/main
+
+      - name: Rebuild and restart web
+        working-directory: /Users/yusufpc/Desktop/Projeler/SahaTakvim
+        run: docker compose up -d --no-deps --build web
+
+      - name: Ensure nginx and certbot are running
+        working-directory: /Users/yusufpc/Desktop/Projeler/SahaTakvim
+        run: docker compose up -d nginx certbot

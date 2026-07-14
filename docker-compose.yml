@@ -1,8 +1,7 @@
 services:
   web:
     build: .
-    ports:
-      - "8000:8000"
+    restart: unless-stopped
     environment:
       FLASK_ENV: production
       SECRET_KEY: ${SECRET_KEY:?SECRET_KEY must be set in .env to a strong, unique value}
@@ -13,3 +12,41 @@ services:
       sh -c "flask db upgrade &&
              flask seed-admin &&
              gunicorn --bind 0.0.0.0:8000 --workers 2 --threads 4 --worker-class gthread --timeout 60 wsgi:app"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\" || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./app/static:/var/www/static:ro
+      - certbot-etc:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-webroot:/var/www/certbot
+    entrypoint: >
+      sh -c "trap exit TERM;
+             while :; do
+               certbot renew --webroot -w /var/www/certbot --quiet;
+               sleep 12h & wait $$!;
+             done"
+
+volumes:
+  certbot-etc:
+  certbot-webroot:

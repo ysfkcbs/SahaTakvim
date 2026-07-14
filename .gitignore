@@ -10,6 +10,7 @@ instance/*.db
 instance/*.sqlite
 instance/*.sqlite3
 migrations/versions/*.pyc
+backups/
 .pytest_cache/
 .DS_Store
 .idea/

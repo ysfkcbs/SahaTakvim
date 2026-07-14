@@ -45,6 +45,11 @@ def _public_occupancy(start, field):
     }
 
 
+@main_bp.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
+
 @main_bp.route("/manifest.webmanifest")
 def web_manifest():
     return send_from_directory(current_app.static_folder, "manifest.webmanifest", mimetype="application/manifest+json")
