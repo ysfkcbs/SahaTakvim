@@ -42,6 +42,22 @@ def env_bool(name, default=False):
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def require_strong_secrets():
+    if os.getenv("FLASK_ENV", "development") != "production":
+        return
+
+    secret = os.getenv("SECRET_KEY", "")
+    if not secret or secret in {"dev-secret", "change-this-secret"}:
+        raise RuntimeError("SECRET_KEY must be set to a strong, unique value in production.")
+
+    admin_password = os.getenv("DEFAULT_ADMIN_PASSWORD", "")
+    if admin_password == "Admin123!":
+        raise RuntimeError("DEFAULT_ADMIN_PASSWORD must be changed from its default value in production.")
+
+
+require_strong_secrets()
+
+
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret")
     SQLALCHEMY_TRACK_MODIFICATIONS = False

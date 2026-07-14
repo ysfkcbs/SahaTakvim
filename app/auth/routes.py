@@ -1,8 +1,10 @@
+from urllib.parse import urlparse
+
 from flask import Blueprint, flash, make_response, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
 
-from app.extensions import db
+from app.extensions import db, limiter
 from app.main.utils import role_required
 from app.models import User
 
@@ -25,7 +27,17 @@ def _no_store_response(response):
     return response
 
 
+def _safe_next_url(target):
+    if not target:
+        return None
+    parsed = urlparse(target)
+    if parsed.scheme or parsed.netloc:
+        return None
+    return target
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("main.index"))
@@ -37,7 +49,8 @@ def login():
         if user and user.check_password(form.password.data) and user.is_active_user:
             login_user(user, remember=True)
             flash("Hoş geldiniz!", "success")
-            return _no_store_response(make_response(redirect(request.args.get("next") or url_for("main.index"))))
+            next_url = _safe_next_url(request.args.get("next"))
+            return _no_store_response(make_response(redirect(next_url or url_for("main.index"))))
 
         flash("Geçersiz giriş bilgileri.", "danger")
 
@@ -63,7 +76,7 @@ def users():
             flash("Bu kullanıcı adı zaten kullanılıyor.", "danger")
         else:
             user = User(username=username, role=form.role.data, is_active_user=form.is_active_user.data)
-            user.set_password(form.password.data or "ChangeMe123!")
+            user.set_password(form.password.data)
             db.session.add(user)
             db.session.commit()
             flash("Kullanıcı oluşturuldu.", "success")

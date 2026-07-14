@@ -12,7 +12,7 @@
       <h5 class="mb-3">Yeni Kullanıcı</h5>
       <form method="post">{{ form.hidden_tag() }}
         <div class="mb-3">{{ form.username.label(class='form-label auth-label') }}{{ form.username(class='form-control form-control-lg') }}</div>
-        <div class="mb-3">{{ form.password.label(class='form-label auth-label') }}{{ form.password(class='form-control form-control-lg', placeholder='Boş bırakılırsa varsayılan') }}</div>
+        <div class="mb-3">{{ form.password.label(class='form-label auth-label') }}{{ form.password(class='form-control form-control-lg', placeholder='Şifre belirleyin') }}</div>
         <div class="mb-3">{{ form.role.label(class='form-label auth-label') }}{{ form.role(class='form-select form-select-lg') }}</div>
         <div class="admin-toggle-card mb-3">
           <div>

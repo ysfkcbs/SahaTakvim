@@ -6,6 +6,7 @@ from sqlalchemy import case, extract, func
 
 from app.calendar.utils import WEEKDAY_NAMES_TR, business_hours, hour_label, week_start_for
 from app.finance.services import daily_closing_total_for_month
+from app.main.utils import role_required
 from app.models import DailyClosing, Expense, Field, Income, Reservation
 
 
@@ -92,6 +93,7 @@ def public_landing():
 
 @main_bp.route("/admin-dashboard")
 @login_required
+@role_required("admin")
 def admin_dashboard():
     today = date.today()
     week_start = today - timedelta(days=today.weekday())
